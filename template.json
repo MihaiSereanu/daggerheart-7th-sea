@@ -1,17 +1,7 @@
 {
   "Actor": {
-    "types": [
-      "character",
-      "npc",
-      "companion",
-      "environment"
-    ],
-    "htmlFields": [
-      "biography",
-      "inventory",
-      "worn",
-      "notes"
-    ],
+    "types": ["character", "npc", "companion", "environment"],
+    "htmlFields": ["biography", "inventory", "worn", "notes"],
     "character": {
       "features": [],
       "biography": "<h1><strong>Backstory</strong></h1><p></p><hr /><h1>Campaign Notes</h1><p></p>",
@@ -124,19 +114,13 @@
         "value": 0,
         "min": -5,
         "max": 5,
-        "tooltip": "Agility affects speed, nimbleness, and reaction time in challenging scenarios."
+        "tooltip": "Finesse affects speed, nimbleness, and precision in challenging scenarios."
       },
       "strength": {
         "value": 0,
         "min": -5,
         "max": 5,
-        "tooltip": "Strength is crucial for physical tasks like breaking, lifting, and resisting."
-      },
-      "finesse": {
-        "value": 0,
-        "min": -1,
-        "max": 5,
-        "tooltip": "Finesse enables precision and stealth in tasks requiring detailed motor skills."
+        "tooltip": "Brawn is crucial for physical tasks like breaking, lifting, and resisting."
       },
       "instinct": {
         "value": 0,
@@ -148,13 +132,13 @@
         "value": 0,
         "min": -5,
         "max": 5,
-        "tooltip": "Presence boosts social influence, intimidation, and attention commanding."
+        "tooltip": "Charm boosts social influence, intimidation, and attention commanding."
       },
       "knowledge": {
         "value": 0,
         "min": -5,
         "max": 5,
-        "tooltip": "Knowledge covers information retention, pattern recognition, and deduction."
+        "tooltip": "Wits covers information retention, pattern recognition, and deduction."
       },
       "exp": {
         "value": 0,
@@ -373,9 +357,7 @@
       "armor",
       "passive"
     ],
-    "htmlFields": [
-      "description"
-    ],
+    "htmlFields": ["description"],
     "item": {
       "description": "",
       "category": "",

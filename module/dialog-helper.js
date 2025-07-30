@@ -6,14 +6,13 @@ import {
   addDice,
   removeDice,
   getAdvantageDescription,
-  calculateNetResult
-} from './advantage-manager.js';
+  calculateNetResult,
+} from "./advantage-manager.js";
 
 export class DaggerheartDialogHelper {
-
   static async showDialog(config) {
-    const dialogClass = `daggerheart-dialog ${config.dialogClass || ''}`;
-    return new Promise(resolve => {
+    const dialogClass = `daggerheart-dialog ${config.dialogClass || ""}`;
+    return new Promise((resolve) => {
       let isResolved = false;
       const safeResolve = (value) => {
         if (!isResolved) {
@@ -31,9 +30,11 @@ export class DaggerheartDialogHelper {
           default: key === defaultKey,
           callback: (event, btn, dialog) => {
             const html = $(dialog.window.content);
-            const result = button.callback ? button.callback(html) : { html, button: key };
+            const result = button.callback
+              ? button.callback(html)
+              : { html, button: key };
             safeResolve(result);
-          }
+          },
         });
       }
 
@@ -44,15 +45,19 @@ export class DaggerheartDialogHelper {
         classes: [dialogClass],
         submit: (result) => {
           safeResolve(result);
-        }
+        },
       });
 
-      dlg.addEventListener('close', () => safeResolve(null));
+      dlg.addEventListener("close", () => safeResolve(null));
       if (config.render) {
-        dlg.addEventListener('render', () => {
-          const html = $(dlg.window.content);
-          config.render(html);
-        }, { once: true });
+        dlg.addEventListener(
+          "render",
+          () => {
+            const html = $(dlg.window.content);
+            config.render(html);
+          },
+          { once: true }
+        );
       }
 
       dlg.render({ force: true });
@@ -63,21 +68,33 @@ export class DaggerheartDialogHelper {
     const content = `
       <form>
         <div class="daggerheart-dialog-content">
-          ${config.description ? `<p class="dialog-description">${config.description}</p>` : ''}
+          ${
+            config.description
+              ? `<p class="dialog-description">${config.description}</p>`
+              : ""
+          }
           <div class="checkbox-group">
-            ${config.options.map(option => `
+            ${config.options
+              .map(
+                (option) => `
               <div class="checkbox-item">
-                <input type="${config.singleSelect ? 'radio' : 'checkbox'}" 
+                <input type="${config.singleSelect ? "radio" : "checkbox"}" 
                        id="${option.id}" 
-                       name="${config.singleSelect ? 'selection' : option.id}" 
+                       name="${config.singleSelect ? "selection" : option.id}" 
                        value="${option.value || option.id}"
-                       ${option.checked ? 'checked' : ''}>
+                       ${option.checked ? "checked" : ""}>
                 <label for="${option.id}">
                   <strong>${option.label}</strong>
-                  ${option.description ? `<span class="option-description">${option.description}</span>` : ''}
+                  ${
+                    option.description
+                      ? `<span class="option-description">${option.description}</span>`
+                      : ""
+                  }
                 </label>
               </div>
-            `).join('')}
+            `
+              )
+              .join("")}
           </div>
         </div>
       </form>
@@ -86,7 +103,7 @@ export class DaggerheartDialogHelper {
     const result = await this.showDialog({
       title: config.title,
       content,
-      dialogClass: 'checkbox-dialog',
+      dialogClass: "checkbox-dialog",
       buttons: {
         confirm: {
           label: config.confirmLabel || "Confirm",
@@ -94,22 +111,23 @@ export class DaggerheartDialogHelper {
           callback: (html) => {
             if (config.singleSelect) {
               const selectedInput = html.find('input[type="radio"]:checked');
-              const selected = selectedInput.length > 0 ? selectedInput.val() : null;
-              return { html, button: 'confirm', selected };
+              const selected =
+                selectedInput.length > 0 ? selectedInput.val() : null;
+              return { html, button: "confirm", selected };
             } else {
               const selected = {};
               html.find('input[type="checkbox"]:checked').each((i, el) => {
                 selected[el.id] = true;
               });
-              return { html, button: 'confirm', selected };
+              return { html, button: "confirm", selected };
             }
-          }
+          },
         },
         cancel: {
           label: "Cancel",
-          callback: () => null
-        }
-      }
+          callback: () => null,
+        },
+      },
     });
 
     return result;
@@ -117,28 +135,31 @@ export class DaggerheartDialogHelper {
 
   static async showDeathMoveDialog(characterName, actor) {
     const options = [
-      { id: 'blaze-of-glory', label: 'Blaze of Glory', value: 'Blaze of Glory' },
-      { id: 'avoid-death', label: 'Avoid Death', value: 'Avoid Death' },
-      { id: 'risk-it-all', label: 'Risk it All', value: 'Risk it All' }
+      {
+        id: "blaze-of-glory",
+        label: "Blaze of Glory",
+        value: "Blaze of Glory",
+      },
+      { id: "avoid-death", label: "Avoid Death", value: "Avoid Death" },
+      { id: "risk-it-all", label: "Risk it All", value: "Risk it All" },
     ];
 
     const result = await this.showCheckboxDialog({
       title: `Death Move - ${characterName}`,
-      description: 'Choose your character\'s death move:',
+      description: "Choose your character's death move:",
       options,
       singleSelect: true,
-      confirmLabel: 'Choose Death Move'
+      confirmLabel: "Choose Death Move",
     });
 
     if (result && result.selected) {
-
       await ChatMessage.create({
         content: `<p><em>${characterName} has chosen ${result.selected} as their Death Move.</em></p>`,
         speaker: ChatMessage.getSpeaker({ actor }),
-        type: CONST.CHAT_MESSAGE_TYPES.OTHER
+        type: CONST.CHAT_MESSAGE_TYPES.OTHER,
       });
 
-      if (result.selected === 'Blaze of Glory') {
+      if (result.selected === "Blaze of Glory") {
         if (game.daggerheart?.rollHandler?.enableForcedCritical) {
           game.daggerheart.rollHandler.enableForcedCritical();
 
@@ -153,13 +174,13 @@ export class DaggerheartDialogHelper {
             type: CONST.CHAT_MESSAGE_TYPES.OTHER,
             flags: {
               daggerheart: {
-                deathMove: 'blaze-of-glory',
-                characterName: characterName
-              }
-            }
+                deathMove: "blaze-of-glory",
+                characterName: characterName,
+              },
+            },
           });
 
-          Hooks.once('daggerheart.dualityRollComplete', async (rollData) => {
+          Hooks.once("daggerheart.dualityRollComplete", async (rollData) => {
             if (rollData.isCrit && rollData.forcedCritical) {
               await ChatMessage.create({
                 content: `
@@ -172,18 +193,20 @@ export class DaggerheartDialogHelper {
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                 flags: {
                   daggerheart: {
-                    deathMove: 'blaze-of-glory-complete',
-                    characterName: characterName
-                  }
-                }
+                    deathMove: "blaze-of-glory-complete",
+                    characterName: characterName,
+                  },
+                },
               });
             }
           });
         } else {
-          ui.notifications.error("Roll handler not available. Please ensure the system is properly initialized.");
+          ui.notifications.error(
+            "Roll handler not available. Please ensure the system is properly initialized."
+          );
           return null;
         }
-      } else if (result.selected === 'Avoid Death') {
+      } else if (result.selected === "Avoid Death") {
         if (!actor) {
           ui.notifications.error("No actor provided for Avoid Death roll.");
           return null;
@@ -200,10 +223,10 @@ export class DaggerheartDialogHelper {
           type: CONST.CHAT_MESSAGE_TYPES.OTHER,
           flags: {
             daggerheart: {
-              deathMove: 'avoid-death',
-              characterName: characterName
-            }
-          }
+              deathMove: "avoid-death",
+              characterName: characterName,
+            },
+          },
         });
 
         const characterLevel = actor.system.level?.value || 1;
@@ -211,7 +234,7 @@ export class DaggerheartDialogHelper {
         if (game.daggerheart?.rollHandler?.rollHope) {
           const hopeResult = await game.daggerheart.rollHandler.rollHope({
             sendToChat: false,
-            returnRoll: false
+            returnRoll: false,
           });
 
           const hopeValue = hopeResult.dieValue;
@@ -253,31 +276,45 @@ export class DaggerheartDialogHelper {
               rolls: [hopeResult.roll],
               flags: {
                 daggerheart: {
-                  deathMove: 'avoid-death-roll',
+                  deathMove: "avoid-death-roll",
                   characterName: characterName,
                   gainsScar: gainsScar,
                   hopeValue: hopeValue,
-                  characterLevel: characterLevel
-                }
-              }
+                  characterLevel: characterLevel,
+                },
+              },
             });
 
-            if (avoidMessage?.id && game.daggerheart?.rollHandler?._waitFor3dDice) {
-              await game.daggerheart.rollHandler._waitFor3dDice(avoidMessage.id);
+            if (
+              avoidMessage?.id &&
+              game.daggerheart?.rollHandler?._waitFor3dDice
+            ) {
+              await game.daggerheart.rollHandler._waitFor3dDice(
+                avoidMessage.id
+              );
             }
           } catch (error) {
-            console.error("Error creating death move avoid roll chat message:", error);
-            ui.notifications.warn("Chat message failed to send, but roll was completed.");
+            console.error(
+              "Error creating death move avoid roll chat message:",
+              error
+            );
+            ui.notifications.warn(
+              "Chat message failed to send, but roll was completed."
+            );
           }
 
           if (gainsScar) {
-            ui.notifications.info(`${characterName} gains a scar. Scar functionality will be implemented in the future.`);
+            ui.notifications.info(
+              `${characterName} gains a scar. Scar functionality will be implemented in the future.`
+            );
           }
         } else {
-          ui.notifications.error("Roll handler not available for Avoid Death roll.");
+          ui.notifications.error(
+            "Roll handler not available for Avoid Death roll."
+          );
           return null;
         }
-      } else if (result.selected === 'Risk it All') {
+      } else if (result.selected === "Risk it All") {
         if (!actor) {
           ui.notifications.error("No actor provided for Risk it All roll.");
           return null;
@@ -294,16 +331,16 @@ export class DaggerheartDialogHelper {
           type: CONST.CHAT_MESSAGE_TYPES.OTHER,
           flags: {
             daggerheart: {
-              deathMove: 'risk-it-all',
-              characterName: characterName
-            }
-          }
+              deathMove: "risk-it-all",
+              characterName: characterName,
+            },
+          },
         });
 
         if (game.daggerheart?.rollHandler?.rollDuality) {
           const dualityResult = await game.daggerheart.rollHandler.rollDuality({
             sendToChat: false,
-            returnRoll: false
+            returnRoll: false,
           });
           console.log(game.daggerheart.rollHandler);
 
@@ -312,10 +349,9 @@ export class DaggerheartDialogHelper {
           const fearWins = hopeDieValue < fearDieValue;
 
           if (isCrit) {
-
             const updateData = {
-              'system.health.value': 0,
-              'system.stress.value': 0
+              "system.health.value": 0,
+              "system.stress.value": 0,
             };
 
             await actor.update(updateData);
@@ -343,26 +379,36 @@ export class DaggerheartDialogHelper {
                 rolls: [dualityResult.roll],
                 flags: {
                   daggerheart: {
-                    deathMove: 'risk-it-all-critical',
+                    deathMove: "risk-it-all-critical",
                     characterName: characterName,
                     hopeDieValue: hopeDieValue,
-                    fearDieValue: fearDieValue
-                  }
-                }
+                    fearDieValue: fearDieValue,
+                  },
+                },
               });
 
-              if (criticalMessage?.id && game.daggerheart?.rollHandler?._waitFor3dDice) {
-                await game.daggerheart.rollHandler._waitFor3dDice(criticalMessage.id);
+              if (
+                criticalMessage?.id &&
+                game.daggerheart?.rollHandler?._waitFor3dDice
+              ) {
+                await game.daggerheart.rollHandler._waitFor3dDice(
+                  criticalMessage.id
+                );
               }
             } catch (error) {
-              console.error("Error creating death move critical chat message:", error);
-              ui.notifications.warn("Chat message failed to send, but roll was completed.");
+              console.error(
+                "Error creating death move critical chat message:",
+                error
+              );
+              ui.notifications.warn(
+                "Chat message failed to send, but roll was completed."
+              );
             }
 
-            ui.notifications.info(`${characterName} achieves miraculous recovery!`);
-
+            ui.notifications.info(
+              `${characterName} achieves miraculous recovery!`
+            );
           } else if (hopeWins) {
-
             try {
               const hopeMessage = await ChatMessage.create({
                 content: `
@@ -385,20 +431,30 @@ export class DaggerheartDialogHelper {
                 rolls: [dualityResult.roll],
                 flags: {
                   daggerheart: {
-                    deathMove: 'risk-it-all-hope',
+                    deathMove: "risk-it-all-hope",
                     characterName: characterName,
                     hopeDieValue: hopeDieValue,
-                    fearDieValue: fearDieValue
-                  }
-                }
+                    fearDieValue: fearDieValue,
+                  },
+                },
               });
 
-              if (hopeMessage?.id && game.daggerheart?.rollHandler?._waitFor3dDice) {
-                await game.daggerheart.rollHandler._waitFor3dDice(hopeMessage.id);
+              if (
+                hopeMessage?.id &&
+                game.daggerheart?.rollHandler?._waitFor3dDice
+              ) {
+                await game.daggerheart.rollHandler._waitFor3dDice(
+                  hopeMessage.id
+                );
               }
             } catch (error) {
-              console.error("Error creating death move hope chat message:", error);
-              ui.notifications.warn("Chat message failed to send, but roll was completed.");
+              console.error(
+                "Error creating death move hope chat message:",
+                error
+              );
+              ui.notifications.warn(
+                "Chat message failed to send, but roll was completed."
+              );
             }
 
             const recoveryChoice = await this.showRecoveryAllocationDialog({
@@ -407,19 +463,25 @@ export class DaggerheartDialogHelper {
               currentHP: actor.system.health?.value || 0,
               currentStress: actor.system.stress?.value || 0,
               maxHP: actor.system.health?.max || 10,
-              maxStress: actor.system.stress?.max || 10
+              maxStress: actor.system.stress?.max || 10,
             });
 
-            if (recoveryChoice && recoveryChoice.button === 'confirm') {
+            if (recoveryChoice && recoveryChoice.button === "confirm") {
               const hpHealing = recoveryChoice.hpHealing || 0;
               const stressHealing = recoveryChoice.stressHealing || 0;
 
-              const newHP = Math.max(0, (actor.system.health?.value || 0) - hpHealing);
-              const newStress = Math.max(0, (actor.system.stress?.value || 0) - stressHealing);
+              const newHP = Math.max(
+                0,
+                (actor.system.health?.value || 0) - hpHealing
+              );
+              const newStress = Math.max(
+                0,
+                (actor.system.stress?.value || 0) - stressHealing
+              );
 
               const updateData = {
-                'system.health.value': newHP,
-                'system.stress.value': newStress
+                "system.health.value": newHP,
+                "system.stress.value": newStress,
               };
 
               await actor.update(updateData);
@@ -436,17 +498,15 @@ export class DaggerheartDialogHelper {
                 type: CONST.CHAT_MESSAGE_TYPES.OTHER,
                 flags: {
                   daggerheart: {
-                    deathMove: 'risk-it-all-recovery',
+                    deathMove: "risk-it-all-recovery",
                     characterName: characterName,
                     hpHealing: hpHealing,
-                    stressHealing: stressHealing
-                  }
-                }
+                    stressHealing: stressHealing,
+                  },
+                },
               });
             }
-
           } else if (fearWins) {
-
             try {
               const deathMessage = await ChatMessage.create({
                 content: `
@@ -470,32 +530,46 @@ export class DaggerheartDialogHelper {
                 rolls: [dualityResult.roll],
                 flags: {
                   daggerheart: {
-                    deathMove: 'risk-it-all-death',
+                    deathMove: "risk-it-all-death",
                     characterName: characterName,
                     hopeDieValue: hopeDieValue,
-                    fearDieValue: fearDieValue
-                  }
-                }
+                    fearDieValue: fearDieValue,
+                  },
+                },
               });
 
-              if (deathMessage?.id && game.daggerheart?.rollHandler?._waitFor3dDice) {
-                await game.daggerheart.rollHandler._waitFor3dDice(deathMessage.id);
+              if (
+                deathMessage?.id &&
+                game.daggerheart?.rollHandler?._waitFor3dDice
+              ) {
+                await game.daggerheart.rollHandler._waitFor3dDice(
+                  deathMessage.id
+                );
               }
             } catch (error) {
-              console.error("Error creating death move death chat message:", error);
-              ui.notifications.warn("Chat message failed to send, but roll was completed.");
+              console.error(
+                "Error creating death move death chat message:",
+                error
+              );
+              ui.notifications.warn(
+                "Chat message failed to send, but roll was completed."
+              );
             }
 
-            ui.notifications.warn(`${characterName} has paid the ultimate price.`);
+            ui.notifications.warn(
+              `${characterName} has paid the ultimate price.`
+            );
           }
-
         } else {
-          ui.notifications.error("Roll handler not available for Risk it All roll.");
+          ui.notifications.error(
+            "Roll handler not available for Risk it All roll."
+          );
           return null;
         }
       } else {
-
-        ui.notifications.info(`Death Move selected: ${result.selected}. Functionality will come in the future.`)
+        ui.notifications.info(
+          `Death Move selected: ${result.selected}. Functionality will come in the future.`
+        );
       }
 
       return result.selected;
@@ -508,17 +582,17 @@ export class DaggerheartDialogHelper {
     const { title = "Roll", rollDetails = {}, actor = null } = config;
 
     const defaults = {
-      hopeDieSize: 'd12',
-      fearDieSize: 'd12',
+      hopeDieSize: "d12",
+      fearDieSize: "d12",
       advantage: createEmptyAdvantageSet(),
       disadvantage: createEmptyAdvantageSet(),
-      modifier: 0
+      modifier: 0,
     };
 
     const normalizedRollDetails = {
       ...rollDetails,
       advantage: normalizeAdvantageData(rollDetails.advantage),
-      disadvantage: normalizeAdvantageData(rollDetails.disadvantage)
+      disadvantage: normalizeAdvantageData(rollDetails.disadvantage),
     };
 
     const initialValues = { ...defaults, ...normalizedRollDetails };
@@ -528,15 +602,15 @@ export class DaggerheartDialogHelper {
       const expData = actor.system.experience;
 
       const expEntries = Object.keys(expData)
-        .filter(k => /Mod\d*$/.test(k))
-        .map(k => {
+        .filter((k) => /Mod\d*$/.test(k))
+        .map((k) => {
           const modValue = parseInt(expData[k]) || 0;
-          const nameKey = k.replace('Mod', 'Name');
+          const nameKey = k.replace("Mod", "Name");
           const nameValue = (expData[nameKey] || `Experience`).trim();
           return { key: k, label: nameValue, mod: modValue };
         })
 
-        .filter(entry => entry.mod !== 0);
+        .filter((entry) => entry.mod !== 0);
 
       if (expEntries.length > 0) {
         experienceSection += `
@@ -548,9 +622,13 @@ export class DaggerheartDialogHelper {
           const checkedId = `expChk_${idx}`;
           experienceSection += `
             <label class="exp-row" style="display:flex;align-items:center;gap:0.5rem;width:100%;">
-              <input type="checkbox" class="exp-checkbox" data-mod="${exp.mod}" id="${checkedId}" />
+              <input type="checkbox" class="exp-checkbox" data-mod="${
+                exp.mod
+              }" id="${checkedId}" />
               <span class="exp-name" style="flex:1;">${exp.label}</span>
-              <span class="exp-mod" style="min-width:2rem;text-align:right;">${exp.mod >= 0 ? '+' : ''}${exp.mod}</span>
+              <span class="exp-mod" style="min-width:2rem;text-align:right;">${
+                exp.mod >= 0 ? "+" : ""
+              }${exp.mod}</span>
             </label>`;
         });
 
@@ -558,18 +636,28 @@ export class DaggerheartDialogHelper {
       }
     }
 
-    const allowedDice = (game.settings.get("daggerheart", "advantageDieTypes") || "d6").split(",");
-    const diceControls = allowedDice.map(die => `
+    const allowedDice = (
+      game.settings.get("daggerheart", "advantageDieTypes") || "d6"
+    ).split(",");
+    const diceControls = allowedDice
+      .map(
+        (die) => `
       <div class="dice-control" data-die="${die}">
         <button type="button" class="dice-btn increase" data-type="advantage" data-die="${die}"><i class="fas fa-plus"></i></button>
         <div class="dice-icon ${die}-icon">
           <i class="fad fa-dice-${[die]}"></i>
-          <span class="dice-count">${initialValues.advantage[die] - initialValues.disadvantage[die]}</span>
+          <span class="dice-count">${
+            initialValues.advantage[die] - initialValues.disadvantage[die]
+          }</span>
         </div>
         <button type="button" class="dice-btn decrease" data-type="advantage" data-die="${die}"><i class="fas fa-minus"></i></button>
-        <input type="hidden" name="advantage-${die}" value="${initialValues.advantage[die] - initialValues.disadvantage[die]}">
+        <input type="hidden" name="advantage-${die}" value="${
+          initialValues.advantage[die] - initialValues.disadvantage[die]
+        }">
       </div>
-    `).join("");
+    `
+      )
+      .join("");
 
     const content = `
     <form>
@@ -578,23 +666,53 @@ export class DaggerheartDialogHelper {
             <div class="flex-col">
                 <span class="label-bar">Hope Die</span>
                 <select name="hopeDieSize" id="hopeDieSize">
-                    <option value="d4" ${initialValues.hopeDieSize === 'd4' ? 'selected' : ''}>d4</option>
-                    <option value="d6" ${initialValues.hopeDieSize === 'd6' ? 'selected' : ''}>d6</option>
-                    <option value="d8" ${initialValues.hopeDieSize === 'd8' ? 'selected' : ''}>d8</option>
-                    <option value="d10" ${initialValues.hopeDieSize === 'd10' ? 'selected' : ''}>d10</option>
-                    <option value="d12" ${initialValues.hopeDieSize === 'd12' || !initialValues.hopeDieSize ? 'selected' : ''}>d12</option>
-                    <option value="d20" ${initialValues.hopeDieSize === 'd20' ? 'selected' : ''}>d20</option>
+                    <option value="d4" ${
+                      initialValues.hopeDieSize === "d4" ? "selected" : ""
+                    }>d4</option>
+                    <option value="d6" ${
+                      initialValues.hopeDieSize === "d6" ? "selected" : ""
+                    }>d6</option>
+                    <option value="d8" ${
+                      initialValues.hopeDieSize === "d8" ? "selected" : ""
+                    }>d8</option>
+                    <option value="d10" ${
+                      initialValues.hopeDieSize === "d10" ? "selected" : ""
+                    }>d10</option>
+                    <option value="d12" ${
+                      initialValues.hopeDieSize === "d12" ||
+                      !initialValues.hopeDieSize
+                        ? "selected"
+                        : ""
+                    }>d12</option>
+                    <option value="d20" ${
+                      initialValues.hopeDieSize === "d20" ? "selected" : ""
+                    }>d20</option>
                 </select>
             </div>
             <div class="flex-col">
                 <span class="label-bar">Fear Die</span>
                 <select name="fearDieSize" id="fearDieSize">
-                    <option value="d4" ${initialValues.fearDieSize === 'd4' ? 'selected' : ''}>d4</option>
-                    <option value="d6" ${initialValues.fearDieSize === 'd6' ? 'selected' : ''}>d6</option>
-                    <option value="d8" ${initialValues.fearDieSize === 'd8' ? 'selected' : ''}>d8</option>
-                    <option value="d10" ${initialValues.fearDieSize === 'd10' ? 'selected' : ''}>d10</option>
-                    <option value="d12" ${initialValues.fearDieSize === 'd12' || !initialValues.fearDieSize ? 'selected' : ''}>d12</option>
-                    <option value="d20" ${initialValues.fearDieSize === 'd20' ? 'selected' : ''}>d20</option>
+                    <option value="d4" ${
+                      initialValues.fearDieSize === "d4" ? "selected" : ""
+                    }>d4</option>
+                    <option value="d6" ${
+                      initialValues.fearDieSize === "d6" ? "selected" : ""
+                    }>d6</option>
+                    <option value="d8" ${
+                      initialValues.fearDieSize === "d8" ? "selected" : ""
+                    }>d8</option>
+                    <option value="d10" ${
+                      initialValues.fearDieSize === "d10" ? "selected" : ""
+                    }>d10</option>
+                    <option value="d12" ${
+                      initialValues.fearDieSize === "d12" ||
+                      !initialValues.fearDieSize
+                        ? "selected"
+                        : ""
+                    }>d12</option>
+                    <option value="d20" ${
+                      initialValues.fearDieSize === "d20" ? "selected" : ""
+                    }>d20</option>
                 </select>
             </div>
         </div>
@@ -609,7 +727,9 @@ export class DaggerheartDialogHelper {
           <span class="label-bar">Flat Modifier</span>
           <div class="flex-row">
             <button id="mod-minus" class="clicker-button clicker-minus-button" type="button"></button>
-            <input id="dualityDiceModifierInput" autofocus name="modifier" step="1" type="number" value="${initialValues.modifier}"/>
+            <input id="dualityDiceModifierInput" autofocus name="modifier" step="1" type="number" value="${
+              initialValues.modifier
+            }"/>
             <button id="mod-plus" class="clicker-button clicker-plus-button" type="button"></button>
           </div>
         </div>
@@ -622,115 +742,136 @@ export class DaggerheartDialogHelper {
     const result = await this.showDialog({
       title,
       content,
-      dialogClass: 'daggerheart-roll-dialog',
+      dialogClass: "daggerheart-roll-dialog",
       buttons: {
         roll: {
           label: "Roll",
           icon: "<i class='fas fa-dice-d12'></i>",
           callback: (html) => {
-
             const netValues = {
               d4: parseInt(html.find('input[name="advantage-d4"]').val()) || 0,
               d6: parseInt(html.find('input[name="advantage-d6"]').val()) || 0,
               d8: parseInt(html.find('input[name="advantage-d8"]').val()) || 0,
-              d10: parseInt(html.find('input[name="advantage-d10"]').val()) || 0
+              d10:
+                parseInt(html.find('input[name="advantage-d10"]').val()) || 0,
             };
 
             const rawAdvantage = {
               d4: Math.max(0, netValues.d4),
               d6: Math.max(0, netValues.d6),
               d8: Math.max(0, netValues.d8),
-              d10: Math.max(0, netValues.d10)
+              d10: Math.max(0, netValues.d10),
             };
 
             const rawDisadvantage = {
               d4: Math.max(0, -netValues.d4),
               d6: Math.max(0, -netValues.d6),
               d8: Math.max(0, -netValues.d8),
-              d10: Math.max(0, -netValues.d10)
+              d10: Math.max(0, -netValues.d10),
             };
 
             const netResult = calculateNetResult(rawAdvantage, rawDisadvantage);
 
             let spend = 0;
             let experice = 0;
-            html.find('.exp-checkbox:checked').each((i, el) => {
+            html.find(".exp-checkbox:checked").each((i, el) => {
               const val = parseInt(el.dataset.mod) || 0;
-              if (val > 0) { experice += val; spend += 1; }
+              if (val > 0) {
+                experice += val;
+                spend += 1;
+              }
             });
 
-            let modifier = parseInt(html.find('#dualityDiceModifierInput').val()) || 0;
+            let modifier =
+              parseInt(html.find("#dualityDiceModifierInput").val()) || 0;
             if (spend > 0 && actor && actor.type === "character") {
               if (actor.system.hope.value >= spend) {
                 modifier += experice;
                 if (game.paused) {
-                  console.log("Daggerheart | Hope spend skipped - game is paused");
+                  console.log(
+                    "Daggerheart | Hope spend skipped - game is paused"
+                  );
                 } else {
                   const value = actor.system.hope.value - spend;
                   actor.update({ "system.hope.value": Math.max(value, 0) });
                 }
               } else {
-                ui.notifications.warn(game.i18n.localize("DH.Notify.NoHopeForExperience"));
+                ui.notifications.warn(
+                  game.i18n.localize("DH.Notify.NoHopeForExperience")
+                );
               }
             }
 
-            const hopeDieSize = html.find('#hopeDieSize').val();
-            const fearDieSize = html.find('#fearDieSize').val();
-            return { advantage: netResult.advantage, disadvantage: netResult.disadvantage, modifier, hopeDieSize, fearDieSize };
-          }
+            const hopeDieSize = html.find("#hopeDieSize").val();
+            const fearDieSize = html.find("#fearDieSize").val();
+            return {
+              advantage: netResult.advantage,
+              disadvantage: netResult.disadvantage,
+              modifier,
+              hopeDieSize,
+              fearDieSize,
+            };
+          },
         },
         rollReaction: {
           label: "Reaction",
           icon: "<i class='fas fa-dice-d12'></i>",
           callback: (html) => {
-
             const netValues = {
               d4: parseInt(html.find('input[name="advantage-d4"]').val()) || 0,
               d6: parseInt(html.find('input[name="advantage-d6"]').val()) || 0,
               d8: parseInt(html.find('input[name="advantage-d8"]').val()) || 0,
-              d10: parseInt(html.find('input[name="advantage-d10"]').val()) || 0
+              d10:
+                parseInt(html.find('input[name="advantage-d10"]').val()) || 0,
             };
 
             const rawAdvantage = {
               d4: Math.max(0, netValues.d4),
               d6: Math.max(0, netValues.d6),
               d8: Math.max(0, netValues.d8),
-              d10: Math.max(0, netValues.d10)
+              d10: Math.max(0, netValues.d10),
             };
 
             const rawDisadvantage = {
               d4: Math.max(0, -netValues.d4),
               d6: Math.max(0, -netValues.d6),
               d8: Math.max(0, -netValues.d8),
-              d10: Math.max(0, -netValues.d10)
+              d10: Math.max(0, -netValues.d10),
             };
 
             const netResult = calculateNetResult(rawAdvantage, rawDisadvantage);
 
-            let modifier = parseInt(html.find('#dualityDiceModifierInput').val()) || 0;
-            html.find('.exp-checkbox:checked').each((i, el) => {
+            let modifier =
+              parseInt(html.find("#dualityDiceModifierInput").val()) || 0;
+            html.find(".exp-checkbox:checked").each((i, el) => {
               modifier += parseInt(el.dataset.mod) || 0;
             });
-            const hopeDieSize = html.find('#hopeDieSize').val();
-            const fearDieSize = html.find('#fearDieSize').val();
-            return { advantage: netResult.advantage, disadvantage: netResult.disadvantage, modifier, hopeDieSize, fearDieSize, reaction: true };
-          }
+            const hopeDieSize = html.find("#hopeDieSize").val();
+            const fearDieSize = html.find("#fearDieSize").val();
+            return {
+              advantage: netResult.advantage,
+              disadvantage: netResult.disadvantage,
+              modifier,
+              hopeDieSize,
+              fearDieSize,
+              reaction: true,
+            };
+          },
         },
         cancel: {
           label: "Cancel",
-          callback: () => null
-        }
+          callback: () => null,
+        },
       },
-      default: 'roll',
+      default: "roll",
       render: (html) => {
-
-        html.find('.dice-btn').on('click', (e) => {
+        html.find(".dice-btn").on("click", (e) => {
           const button = $(e.currentTarget);
-          const die = button.data('die');
-          const isIncrease = button.hasClass('increase');
+          const die = button.data("die");
+          const isIncrease = button.hasClass("increase");
 
           const hiddenInput = html.find(`input[name="advantage-${die}"]`);
-          const countSpan = button.siblings('.dice-icon').find('.dice-count');
+          const countSpan = button.siblings(".dice-icon").find(".dice-count");
 
           let currentValue = parseInt(hiddenInput.val()) || 0;
 
@@ -743,13 +884,13 @@ export class DaggerheartDialogHelper {
           hiddenInput.val(currentValue);
           countSpan.text(currentValue);
 
-          const diceIcon = button.siblings('.dice-icon');
+          const diceIcon = button.siblings(".dice-icon");
           if (currentValue === 0) {
-            diceIcon.addClass('empty').removeClass('advantage disadvantage');
+            diceIcon.addClass("empty").removeClass("advantage disadvantage");
           } else if (currentValue > 0) {
-            diceIcon.removeClass('empty disadvantage').addClass('advantage');
+            diceIcon.removeClass("empty disadvantage").addClass("advantage");
           } else {
-            diceIcon.removeClass('empty advantage').addClass('disadvantage');
+            diceIcon.removeClass("empty advantage").addClass("disadvantage");
           }
         });
 
@@ -761,8 +902,12 @@ export class DaggerheartDialogHelper {
           input.val(newValue);
         }
 
-        html.find('#mod-plus').click(() => incrementInput('#dualityDiceModifierInput', 1));
-        html.find('#mod-minus').click(() => incrementInput('#dualityDiceModifierInput', -1));
+        html
+          .find("#mod-plus")
+          .click(() => incrementInput("#dualityDiceModifierInput", 1));
+        html
+          .find("#mod-minus")
+          .click(() => incrementInput("#dualityDiceModifierInput", -1));
 
         for (const input of html.find("input[type=number]")) {
           input.addEventListener("wheel", (event) => {
@@ -776,21 +921,21 @@ export class DaggerheartDialogHelper {
           });
         }
 
-        html.find('.dice-control').each((i, control) => {
+        html.find(".dice-control").each((i, control) => {
           const $control = $(control);
           const hiddenInput = $control.find('input[type="hidden"]');
-          const diceIcon = $control.find('.dice-icon');
+          const diceIcon = $control.find(".dice-icon");
           const currentValue = parseInt(hiddenInput.val()) || 0;
 
           if (currentValue === 0) {
-            diceIcon.addClass('empty').removeClass('advantage disadvantage');
+            diceIcon.addClass("empty").removeClass("advantage disadvantage");
           } else if (currentValue > 0) {
-            diceIcon.removeClass('empty disadvantage').addClass('advantage');
+            diceIcon.removeClass("empty disadvantage").addClass("advantage");
           } else {
-            diceIcon.removeClass('empty advantage').addClass('disadvantage');
+            diceIcon.removeClass("empty advantage").addClass("disadvantage");
           }
         });
-      }
+      },
     });
 
     return result;
@@ -800,10 +945,10 @@ export class DaggerheartDialogHelper {
     const { title = "Roll", rollDetails = {} } = config;
 
     const defaults = {
-      dieSize: 'd20',
+      dieSize: "d20",
       advantage: 0,
       disadvantage: 0,
-      modifier: 0
+      modifier: 0,
     };
 
     const initialValues = { ...defaults, ...rollDetails };
@@ -846,36 +991,48 @@ export class DaggerheartDialogHelper {
     const result = await this.showDialog({
       title,
       content,
-      dialogClass: 'daggerheart-roll-dialog',
+      dialogClass: "daggerheart-roll-dialog",
       buttons: {
         roll: {
           label: "Roll",
           icon: "<i class='fas fa-dice-d20'></i>",
           callback: (html) => {
-            const advantage = parseInt(html.find('#npcDiceAdvantageInput').val()) || 0;
-            const disadvantage = parseInt(html.find('#npcDiceDisadvantageInput').val()) || 0;
-            const modifier = parseInt(html.find('#npcDiceModifierInput').val()) || 0;
+            const advantage =
+              parseInt(html.find("#npcDiceAdvantageInput").val()) || 0;
+            const disadvantage =
+              parseInt(html.find("#npcDiceDisadvantageInput").val()) || 0;
+            const modifier =
+              parseInt(html.find("#npcDiceModifierInput").val()) || 0;
             const dieSize = defaults.dieSize;
             return { advantage, disadvantage, modifier, dieSize };
-          }
+          },
         },
         rollReaction: {
           label: "Reaction",
           icon: "<i class='fas fa-dice-d20'></i>",
           callback: (html) => {
-            const advantage = parseInt(html.find('#npcDiceAdvantageInput').val()) || 0;
-            const disadvantage = parseInt(html.find('#npcDiceDisadvantageInput').val()) || 0;
-            const modifier = parseInt(html.find('#npcDiceModifierInput').val()) || 0;
+            const advantage =
+              parseInt(html.find("#npcDiceAdvantageInput").val()) || 0;
+            const disadvantage =
+              parseInt(html.find("#npcDiceDisadvantageInput").val()) || 0;
+            const modifier =
+              parseInt(html.find("#npcDiceModifierInput").val()) || 0;
             const dieSize = defaults.dieSize;
-            return { advantage, disadvantage, modifier, dieSize, reaction: true };
-          }
+            return {
+              advantage,
+              disadvantage,
+              modifier,
+              dieSize,
+              reaction: true,
+            };
+          },
         },
         cancel: {
           label: "Cancel",
-          callback: () => null
-        }
+          callback: () => null,
+        },
       },
-      default: 'roll',
+      default: "roll",
       render: (html) => {
         function incrementInput(selector, by, clampLo = null) {
           let input = html.find(selector);
@@ -885,12 +1042,24 @@ export class DaggerheartDialogHelper {
           input.val(newValue);
         }
 
-        html.find('#adv-plus').click(() => incrementInput('#npcDiceAdvantageInput', 1, 0));
-        html.find('#adv-minus').click(() => incrementInput('#npcDiceAdvantageInput', -1, 0));
-        html.find('#dis-plus').click(() => incrementInput('#npcDiceDisadvantageInput', 1, 0));
-        html.find('#dis-minus').click(() => incrementInput('#npcDiceDisadvantageInput', -1, 0));
-        html.find('#mod-plus').click(() => incrementInput('#npcDiceModifierInput', 1));
-        html.find('#mod-minus').click(() => incrementInput('#npcDiceModifierInput', -1));
+        html
+          .find("#adv-plus")
+          .click(() => incrementInput("#npcDiceAdvantageInput", 1, 0));
+        html
+          .find("#adv-minus")
+          .click(() => incrementInput("#npcDiceAdvantageInput", -1, 0));
+        html
+          .find("#dis-plus")
+          .click(() => incrementInput("#npcDiceDisadvantageInput", 1, 0));
+        html
+          .find("#dis-minus")
+          .click(() => incrementInput("#npcDiceDisadvantageInput", -1, 0));
+        html
+          .find("#mod-plus")
+          .click(() => incrementInput("#npcDiceModifierInput", 1));
+        html
+          .find("#mod-minus")
+          .click(() => incrementInput("#npcDiceModifierInput", -1));
 
         for (const input of html.find("input[type=number]")) {
           input.addEventListener("wheel", (event) => {
@@ -903,14 +1072,21 @@ export class DaggerheartDialogHelper {
             }
           });
         }
-      }
+      },
     });
 
     return result;
   }
 
   static async showRecoveryAllocationDialog(config) {
-    const { characterName, availablePoints, currentHP, currentStress, maxHP, maxStress } = config;
+    const {
+      characterName,
+      availablePoints,
+      currentHP,
+      currentStress,
+      maxHP,
+      maxStress,
+    } = config;
 
     const maxHPHealing = currentHP;
     const maxStressHealing = currentStress;
@@ -939,7 +1115,10 @@ export class DaggerheartDialogHelper {
               <label for="hpHealing">HP Healing:</label>
               <div class="stepper-group">
                 <button type="button" class="recovery-minus" data-target="hpHealing">-</button>
-                <input type="number" id="hpHealing" name="hpHealing" min="0" max="${Math.min(maxHPHealing, availablePoints)}" value="0" />
+                <input type="number" id="hpHealing" name="hpHealing" min="0" max="${Math.min(
+                  maxHPHealing,
+                  availablePoints
+                )}" value="0" />
                 <button type="button" class="recovery-plus" data-target="hpHealing">+</button>
               </div>
               <span class="max-available">(max: ${maxHPHealing})</span>
@@ -949,7 +1128,10 @@ export class DaggerheartDialogHelper {
               <label for="stressHealing">Stress Healing:</label>
               <div class="stepper-group">
                 <button type="button" class="recovery-minus" data-target="stressHealing">-</button>
-                <input type="number" id="stressHealing" name="stressHealing" min="0" max="${Math.min(maxStressHealing, availablePoints)}" value="0" />
+                <input type="number" id="stressHealing" name="stressHealing" min="0" max="${Math.min(
+                  maxStressHealing,
+                  availablePoints
+                )}" value="0" />
                 <button type="button" class="recovery-plus" data-target="stressHealing">+</button>
               </div>
               <span class="max-available">(max: ${maxStressHealing})</span>
@@ -974,28 +1156,29 @@ export class DaggerheartDialogHelper {
     const result = await this.showDialog({
       title: `Recovery Allocation - ${characterName}`,
       content,
-      dialogClass: 'recovery-dialog',
+      dialogClass: "recovery-dialog",
       buttons: {
         confirm: {
           label: "Apply Healing",
           icon: '<i class="fas fa-heart"></i>',
           callback: (html) => {
-            const hpHealing = parseInt(html.find('#hpHealing').val()) || 0;
-            const stressHealing = parseInt(html.find('#stressHealing').val()) || 0;
-            return { html, button: 'confirm', hpHealing, stressHealing };
-          }
+            const hpHealing = parseInt(html.find("#hpHealing").val()) || 0;
+            const stressHealing =
+              parseInt(html.find("#stressHealing").val()) || 0;
+            return { html, button: "confirm", hpHealing, stressHealing };
+          },
         },
         cancel: {
           label: "Cancel",
-          callback: () => null
-        }
+          callback: () => null,
+        },
       },
-      default: 'confirm',
+      default: "confirm",
       render: (html) => {
-        const hpInput = html.find('#hpHealing');
-        const stressInput = html.find('#stressHealing');
-        const pointsUsedSpan = html.find('#pointsUsed');
-        const remainingSpan = html.find('#remainingPoints');
+        const hpInput = html.find("#hpHealing");
+        const stressInput = html.find("#stressHealing");
+        const pointsUsedSpan = html.find("#pointsUsed");
+        const remainingSpan = html.find("#remainingPoints");
 
         function updateDisplay() {
           const hpVal = parseInt(hpInput.val()) || 0;
@@ -1007,28 +1190,35 @@ export class DaggerheartDialogHelper {
           remainingSpan.text(`Remaining: ${remaining}`);
 
           if (total > availablePoints) {
-            remainingSpan.css('color', '#e38c3e').text(`Over by: ${total - availablePoints}`);
+            remainingSpan
+              .css("color", "#e38c3e")
+              .text(`Over by: ${total - availablePoints}`);
           } else if (total === availablePoints) {
-            remainingSpan.css('color', '#81ccc3').text('Perfect allocation!');
+            remainingSpan.css("color", "#81ccc3").text("Perfect allocation!");
           } else {
-            remainingSpan.css('color', '#f0f0e0').text(`Remaining: ${remaining}`);
+            remainingSpan
+              .css("color", "#f0f0e0")
+              .text(`Remaining: ${remaining}`);
           }
 
           const remainingForHP = Math.min(maxHPHealing, hpVal + remaining);
-          const remainingForStress = Math.min(maxStressHealing, stressVal + remaining);
+          const remainingForStress = Math.min(
+            maxStressHealing,
+            stressVal + remaining
+          );
 
-          hpInput.attr('max', remainingForHP);
-          stressInput.attr('max', remainingForStress);
+          hpInput.attr("max", remainingForHP);
+          stressInput.attr("max", remainingForStress);
         }
 
-        hpInput.on('input change', updateDisplay);
-        stressInput.on('input change', updateDisplay);
+        hpInput.on("input change", updateDisplay);
+        stressInput.on("input change", updateDisplay);
 
-        html.find('.recovery-plus').on('click', (e) => {
-          const target = $(e.currentTarget).data('target');
+        html.find(".recovery-plus").on("click", (e) => {
+          const target = $(e.currentTarget).data("target");
           const input = html.find(`#${target}`);
           const currentVal = parseInt(input.val()) || 0;
-          const maxVal = parseInt(input.attr('max')) || 0;
+          const maxVal = parseInt(input.attr("max")) || 0;
 
           if (currentVal < maxVal) {
             input.val(currentVal + 1);
@@ -1036,8 +1226,8 @@ export class DaggerheartDialogHelper {
           }
         });
 
-        html.find('.recovery-minus').on('click', (e) => {
-          const target = $(e.currentTarget).data('target');
+        html.find(".recovery-minus").on("click", (e) => {
+          const target = $(e.currentTarget).data("target");
           const input = html.find(`#${target}`);
           const currentVal = parseInt(input.val()) || 0;
 
@@ -1047,26 +1237,29 @@ export class DaggerheartDialogHelper {
           }
         });
 
-        html.find('.quick-btn').on('click', (e) => {
-          const action = $(e.currentTarget).data('action');
+        html.find(".quick-btn").on("click", (e) => {
+          const action = $(e.currentTarget).data("action");
 
           switch (action) {
-            case 'maxHP':
+            case "maxHP":
               hpInput.val(Math.min(maxHPHealing, availablePoints));
               stressInput.val(0);
               break;
-            case 'maxStress':
+            case "maxStress":
               hpInput.val(0);
               stressInput.val(Math.min(maxStressHealing, availablePoints));
               break;
-            case 'split':
+            case "split":
               const splitAmount = Math.floor(availablePoints / 2);
               const hpAmount = Math.min(splitAmount, maxHPHealing);
-              const stressAmount = Math.min(availablePoints - hpAmount, maxStressHealing);
+              const stressAmount = Math.min(
+                availablePoints - hpAmount,
+                maxStressHealing
+              );
               hpInput.val(hpAmount);
               stressInput.val(stressAmount);
               break;
-            case 'clear':
+            case "clear":
               hpInput.val(0);
               stressInput.val(0);
               break;
@@ -1076,7 +1269,7 @@ export class DaggerheartDialogHelper {
         });
 
         updateDisplay();
-      }
+      },
     });
 
     return result;
@@ -1085,37 +1278,39 @@ export class DaggerheartDialogHelper {
   static async showShortRestDialog(characterName, actor) {
     const options = [
       {
-        id: 'tend-wounds',
-        label: 'Tend to Wounds',
-        value: 'tend-wounds',
-        description: 'Clear 1d4 + character tier hit points'
+        id: "tend-wounds",
+        label: "Tend to Wounds",
+        value: "tend-wounds",
+        description: "Clear 1d4 HP",
       },
       {
-        id: 'clear-stress',
-        label: 'Clear Stress',
-        value: 'clear-stress',
-        description: 'Clear 1d4 + character tier stress'
+        id: "clear-stress",
+        label: "Clear Stress",
+        value: "clear-stress",
+        description: "Clear 1d4 Stress",
       },
       {
-        id: 'repair-armor',
-        label: 'Repair Armor',
-        value: 'repair-armor',
-        description: 'Clear 1d4 + character tier armor slots'
+        id: "repair-armor",
+        label: "Repair Armor",
+        value: "repair-armor",
+        description: "Clear 1d4 Armor Slots",
       },
       {
-        id: 'prepare',
-        label: 'Prepare',
-        value: 'prepare',
-        description: 'Gain a hope'
-      }
+        id: "prepare",
+        label: "Prepare",
+        value: "prepare",
+        description: "Gain a hope",
+      },
     ];
 
     const content = `
       <form>
         <div class="daggerheart-dialog-content">
-          <p class="dialog-description">Choose your options for your Short Rest:</p>
+          <p class="dialog-description">Choose your options for your Rest:</p>
           <div class="checkbox-group">
-            ${options.map(option => `
+            ${options
+              .map(
+                (option) => `
               <div class="checkbox-item">
                 <input type="checkbox" 
                        id="${option.id}" 
@@ -1126,7 +1321,9 @@ export class DaggerheartDialogHelper {
                   <span class="option-description">${option.description}</span>
                 </label>
               </div>
-            `).join('')}
+            `
+              )
+              .join("")}
           </div>
         </div>
       </form>
@@ -1135,31 +1332,28 @@ export class DaggerheartDialogHelper {
     const result = await this.showDialog({
       title: `Short Rest - ${characterName}`,
       content,
-      dialogClass: 'checkbox-dialog short-rest-dialog',
+      dialogClass: "checkbox-dialog short-rest-dialog",
       buttons: {
         confirm: {
-          label: "Take Short Rest",
+          label: "Take A Rest",
           icon: '<i class="fas fa-bed"></i>',
           callback: (html) => {
             const selected = [];
             html.find('input[type="checkbox"]:checked').each((i, el) => {
               selected.push(el.value);
             });
-            return { html, button: 'confirm', selected };
-          }
+            return { html, button: "confirm", selected };
+          },
         },
         cancel: {
           label: "Cancel",
-          callback: () => null
-        }
+          callback: () => null,
+        },
       },
-      render: (html) => {
-
-      }
+      render: (html) => {},
     });
 
     if (result && result.selected) {
-
       await this._processShortRest(characterName, actor, result.selected);
       return result.selected;
     }
@@ -1168,14 +1362,15 @@ export class DaggerheartDialogHelper {
   }
 
   static async _processShortRest(characterName, actor, selectedOptions) {
-
-    const tier = game.daggerheart?.getTierOfPlay ? game.daggerheart.getTierOfPlay(actor) : 1;
+    const tier = game.daggerheart?.getTierOfPlay
+      ? game.daggerheart.getTierOfPlay(actor)
+      : 1;
 
     try {
       await ChatMessage.create({
         content: `
           <div class="short-rest-start">
-            <p><strong>${characterName} takes a Short Rest</strong></p>
+            <p><strong>${characterName} takes a Rest</strong></p>
             <p><em>Taking time to recover and regroup...</em></p>
           </div>
         `,
@@ -1183,10 +1378,10 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'short-rest-start',
-            characterName: characterName
-          }
-        }
+            restType: "short-rest-start",
+            characterName: characterName,
+          },
+        },
       });
     } catch (error) {
       console.error("Error creating short rest start chat message:", error);
@@ -1196,21 +1391,21 @@ export class DaggerheartDialogHelper {
     for (const option of selectedOptions) {
       try {
         switch (option) {
-          case 'tend-wounds':
+          case "tend-wounds":
             await this._processTendWounds(characterName, actor, tier);
             break;
-          case 'clear-stress':
+          case "clear-stress":
             await this._processClearStress(characterName, actor, tier);
             break;
-          case 'repair-armor':
+          case "repair-armor":
             await this._processRepairArmor(characterName, actor, tier);
             break;
-          case 'prepare':
+          case "prepare":
             await this._processPrepare(characterName, actor);
             break;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
         console.error(`Error processing short rest option '${option}':`, error);
         ui.notifications.warn(`Failed to process ${option} during short rest.`);
@@ -1247,15 +1442,20 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'short-rest-tend-wounds',
+            restType: "short-rest-tend-wounds",
             characterName: characterName,
-            healingAmount: healingAmount
-          }
-        }
+            healingAmount: healingAmount,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating short rest tend wounds chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but healing was applied.");
+      console.error(
+        "Error creating short rest tend wounds chat message:",
+        error
+      );
+      ui.notifications.warn(
+        "Chat message failed to send, but healing was applied."
+      );
     }
   }
 
@@ -1288,15 +1488,20 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'short-rest-clear-stress',
+            restType: "short-rest-clear-stress",
             characterName: characterName,
-            stressCleared: stressCleared
-          }
-        }
+            stressCleared: stressCleared,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating short rest clear stress chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but stress was cleared.");
+      console.error(
+        "Error creating short rest clear stress chat message:",
+        error
+      );
+      ui.notifications.warn(
+        "Chat message failed to send, but stress was cleared."
+      );
     }
   }
 
@@ -1305,7 +1510,8 @@ export class DaggerheartDialogHelper {
     await roll.evaluate();
 
     const armorRepaired = roll.total;
-    const currentArmorSlots = actor.system.defenses?.['armor-slots']?.value || 0;
+    const currentArmorSlots =
+      actor.system.defenses?.["armor-slots"]?.value || 0;
     const maxArmor = actor.system.defenses?.armor?.value || 0;
     const newArmorSlots = Math.max(0, currentArmorSlots - armorRepaired);
 
@@ -1330,15 +1536,20 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'short-rest-repair-armor',
+            restType: "short-rest-repair-armor",
             characterName: characterName,
-            armorRepaired: armorRepaired
-          }
-        }
+            armorRepaired: armorRepaired,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating short rest repair armor chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but armor was repaired.");
+      console.error(
+        "Error creating short rest repair armor chat message:",
+        error
+      );
+      ui.notifications.warn(
+        "Chat message failed to send, but armor was repaired."
+      );
     }
   }
 
@@ -1362,114 +1573,115 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'short-rest-prepare',
+            restType: "short-rest-prepare",
             characterName: characterName,
-            hopeGained: 1
-          }
-        }
+            hopeGained: 1,
+          },
+        },
       });
     } catch (error) {
       console.error("Error creating short rest prepare chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but Hope was gained.");
+      ui.notifications.warn(
+        "Chat message failed to send, but Hope was gained."
+      );
     }
   }
 
-  static async showLongRestDialog(characterName, actor) {
-    const options = [
-      {
-        id: 'tend-all-wounds',
-        label: 'Tend to All Wounds',
-        value: 'tend-all-wounds',
-        description: 'Clear all Hit Points (can do to an ally instead)'
-      },
-      {
-        id: 'clear-all-stress',
-        label: 'Clear All Stress',
-        value: 'clear-all-stress',
-        description: 'Clear all Stress'
-      },
-      {
-        id: 'repair-all-armor',
-        label: 'Repair All Armor',
-        value: 'repair-all-armor',
-        description: 'Clear all Armor Slots (can do to an ally instead)'
-      },
-      {
-        id: 'prepare',
-        label: 'Prepare',
-        value: 'prepare',
-        description: 'Gain 1 Hope (2 Hope if done with party members)'
-      },
-      {
-        id: 'work-project',
-        label: 'Work on a Project',
-        value: 'work-project',
-        description: 'Establish or continue work on a project'
-      }
-    ];
+  // static async showLongRestDialog(characterName, actor) {
+  //   const options = [
+  //     {
+  //       id: 'tend-all-wounds',
+  //       label: 'Tend to All Wounds',
+  //       value: 'tend-all-wounds',
+  //       description: 'Clear all Hit Points (can do to an ally instead)'
+  //     },
+  //     {
+  //       id: 'clear-all-stress',
+  //       label: 'Clear All Stress',
+  //       value: 'clear-all-stress',
+  //       description: 'Clear all Stress'
+  //     },
+  //     {
+  //       id: 'repair-all-armor',
+  //       label: 'Repair All Armor',
+  //       value: 'repair-all-armor',
+  //       description: 'Clear all Armor Slots (can do to an ally instead)'
+  //     },
+  //     {
+  //       id: 'prepare',
+  //       label: 'Prepare',
+  //       value: 'prepare',
+  //       description: 'Gain 1 Hope (2 Hope if done with party members)'
+  //     },
+  //     {
+  //       id: 'work-project',
+  //       label: 'Work on a Project',
+  //       value: 'work-project',
+  //       description: 'Establish or continue work on a project'
+  //     }
+  //   ];
 
-    const content = `
-      <form>
-        <div class="daggerheart-dialog-content">
-          <div class="dialog-reminder">
-            <p><strong>Domain Card Swapping:</strong> You can swap any domain cards in your loadout for cards in your vault.</p>
-          </div>
-          <p class="dialog-description">Choose your options for your Long Rest:</p>
-          <div class="checkbox-group">
-            ${options.map(option => `
-              <div class="checkbox-item" data-option-id="${option.id}">
-                <input type="checkbox" 
-                       id="${option.id}" 
-                       name="${option.id}" 
-                       value="${option.value}">
-                <label for="${option.id}">
-                  <strong>${option.label}</strong>
-                  <span class="option-description">${option.description}</span>
-                </label>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </form>
-    `;
+  //   const content = `
+  //     <form>
+  //       <div class="daggerheart-dialog-content">
+  //         <div class="dialog-reminder">
+  //           <p><strong>Domain Card Swapping:</strong> You can swap any domain cards in your loadout for cards in your vault.</p>
+  //         </div>
+  //         <p class="dialog-description">Choose your options for your Long Rest:</p>
+  //         <div class="checkbox-group">
+  //           ${options.map(option => `
+  //             <div class="checkbox-item" data-option-id="${option.id}">
+  //               <input type="checkbox"
+  //                      id="${option.id}"
+  //                      name="${option.id}"
+  //                      value="${option.value}">
+  //               <label for="${option.id}">
+  //                 <strong>${option.label}</strong>
+  //                 <span class="option-description">${option.description}</span>
+  //               </label>
+  //             </div>
+  //           `).join('')}
+  //         </div>
+  //       </div>
+  //     </form>
+  //   `;
 
-    const result = await this.showDialog({
-      title: `Long Rest - ${characterName}`,
-      content,
-      dialogClass: 'checkbox-dialog long-rest-dialog',
-      buttons: {
-        confirm: {
-          label: "Take Long Rest",
-          icon: '<i class="fas fa-campground"></i>',
-          callback: (html) => {
-            const selected = [];
-            html.find('input[type="checkbox"]:checked').each((i, el) => {
-              selected.push(el.value);
-            });
-            return { html, button: 'confirm', selected };
-          }
-        },
-        cancel: {
-          label: "Cancel",
-          callback: () => null
-        }
-      },
-      render: (html) => {
+  //   const result = await this.showDialog({
+  //     title: `Long Rest - ${characterName}`,
+  //     content,
+  //     dialogClass: 'checkbox-dialog long-rest-dialog',
+  //     buttons: {
+  //       confirm: {
+  //         label: "Take Long Rest",
+  //         icon: '<i class="fas fa-campground"></i>',
+  //         callback: (html) => {
+  //           const selected = [];
+  //           html.find('input[type="checkbox"]:checked').each((i, el) => {
+  //             selected.push(el.value);
+  //           });
+  //           return { html, button: 'confirm', selected };
+  //         }
+  //       },
+  //       cancel: {
+  //         label: "Cancel",
+  //         callback: () => null
+  //       }
+  //     },
+  //     render: (html) => {
 
-      }
-    });
+  //     }
+  //   });
 
-    if (result && result.selected) {
+  //   if (result && result.selected) {
 
-      await this._processLongRest(characterName, actor, result.selected);
-      return result.selected;
-    }
+  //     await this._processLongRest(characterName, actor, result.selected);
+  //     return result.selected;
+  //   }
 
-    return null;
-  }
+  //   return null;
+  // }
 
   static async _processLongRest(characterName, actor, selectedOptions) {
-
     try {
       await ChatMessage.create({
         content: `
@@ -1482,10 +1694,10 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'long-rest-start',
-            characterName: characterName
-          }
-        }
+            restType: "long-rest-start",
+            characterName: characterName,
+          },
+        },
       });
     } catch (error) {
       console.error("Error creating long rest start chat message:", error);
@@ -1493,7 +1705,7 @@ export class DaggerheartDialogHelper {
     }
 
     const optionCounts = {};
-    selectedOptions.forEach(option => {
+    selectedOptions.forEach((option) => {
       optionCounts[option] = (optionCounts[option] || 0) + 1;
     });
 
@@ -1501,27 +1713,32 @@ export class DaggerheartDialogHelper {
       for (let i = 0; i < count; i++) {
         try {
           switch (option) {
-            case 'tend-all-wounds':
+            case "tend-all-wounds":
               await this._processLongRestTendWounds(characterName, actor);
               break;
-            case 'clear-all-stress':
+            case "clear-all-stress":
               await this._processLongRestClearStress(characterName, actor);
               break;
-            case 'repair-all-armor':
+            case "repair-all-armor":
               await this._processLongRestRepairArmor(characterName, actor);
               break;
-            case 'prepare':
+            case "prepare":
               await this._processLongRestPrepare(characterName, actor);
               break;
-            case 'work-project':
+            case "work-project":
               await this._processLongRestWorkProject(characterName, actor);
               break;
           }
 
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         } catch (error) {
-          console.error(`Error processing long rest option '${option}':`, error);
-          ui.notifications.warn(`Failed to process ${option} during long rest.`);
+          console.error(
+            `Error processing long rest option '${option}':`,
+            error
+          );
+          ui.notifications.warn(
+            `Failed to process ${option} during long rest.`
+          );
         }
       }
     }
@@ -1546,15 +1763,20 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'long-rest-tend-wounds',
+            restType: "long-rest-tend-wounds",
             characterName: characterName,
-            healingAmount: currentHP
-          }
-        }
+            healingAmount: currentHP,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating long rest tend wounds chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but healing was applied.");
+      console.error(
+        "Error creating long rest tend wounds chat message:",
+        error
+      );
+      ui.notifications.warn(
+        "Chat message failed to send, but healing was applied."
+      );
     }
   }
 
@@ -1577,20 +1799,26 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'long-rest-clear-stress',
+            restType: "long-rest-clear-stress",
             characterName: characterName,
-            stressCleared: currentStress
-          }
-        }
+            stressCleared: currentStress,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating long rest clear stress chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but stress was cleared.");
+      console.error(
+        "Error creating long rest clear stress chat message:",
+        error
+      );
+      ui.notifications.warn(
+        "Chat message failed to send, but stress was cleared."
+      );
     }
   }
 
   static async _processLongRestRepairArmor(characterName, actor) {
-    const currentArmorSlots = actor.system.defenses?.['armor-slots']?.value || 0;
+    const currentArmorSlots =
+      actor.system.defenses?.["armor-slots"]?.value || 0;
     const newArmorSlots = 0;
 
     await actor.update({ "system.defenses.armor-slots.value": newArmorSlots });
@@ -1608,20 +1836,24 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'long-rest-repair-armor',
+            restType: "long-rest-repair-armor",
             characterName: characterName,
-            armorRepaired: currentArmorSlots
-          }
-        }
+            armorRepaired: currentArmorSlots,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating long rest repair armor chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but armor was repaired.");
+      console.error(
+        "Error creating long rest repair armor chat message:",
+        error
+      );
+      ui.notifications.warn(
+        "Chat message failed to send, but armor was repaired."
+      );
     }
   }
 
   static async _processLongRestPrepare(characterName, actor) {
-
     const currentHope = actor.system.hope?.value || 0;
     const maxHope = actor.system.hope?.max || 0;
     const hopeGained = 1;
@@ -1645,15 +1877,17 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'long-rest-prepare',
+            restType: "long-rest-prepare",
             characterName: characterName,
-            hopeGained: hopeGained
-          }
-        }
+            hopeGained: hopeGained,
+          },
+        },
       });
     } catch (error) {
       console.error("Error creating long rest prepare chat message:", error);
-      ui.notifications.warn("Chat message failed to send, but Hope was gained.");
+      ui.notifications.warn(
+        "Chat message failed to send, but Hope was gained."
+      );
     }
   }
 
@@ -1674,13 +1908,16 @@ export class DaggerheartDialogHelper {
         type: CONST.CHAT_MESSAGE_TYPES.OTHER,
         flags: {
           daggerheart: {
-            restType: 'long-rest-work-project',
-            characterName: characterName
-          }
-        }
+            restType: "long-rest-work-project",
+            characterName: characterName,
+          },
+        },
       });
     } catch (error) {
-      console.error("Error creating long rest work project chat message:", error);
+      console.error(
+        "Error creating long rest work project chat message:",
+        error
+      );
       ui.notifications.warn("Chat message failed to send, but work continues.");
     }
   }

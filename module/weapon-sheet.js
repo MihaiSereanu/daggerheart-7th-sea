@@ -16,16 +16,15 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
 
   async getData(options) {
     const context = await super.getData(options);
-    
+
     // Add weapon-specific dropdown options
     context.traitOptions = [
       { value: "", label: game.i18n.localize("DH.WeaponTrait") },
       { value: "agility", label: game.i18n.localize("DH.Agility") },
       { value: "strength", label: game.i18n.localize("DH.Strength") },
-      { value: "finesse", label: game.i18n.localize("DH.Finesse") },
       { value: "instinct", label: game.i18n.localize("DH.Instinct") },
       { value: "presence", label: game.i18n.localize("DH.Presence") },
-      { value: "knowledge", label: game.i18n.localize("DH.Knowledge") }
+      { value: "knowledge", label: game.i18n.localize("DH.Knowledge") },
     ];
 
     context.rangeOptions = [
@@ -34,13 +33,13 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
       { value: "veryClose", label: game.i18n.localize("DH.VeryClose") },
       { value: "close", label: game.i18n.localize("DH.Close") },
       { value: "far", label: game.i18n.localize("DH.Far") },
-      { value: "veryFar", label: game.i18n.localize("DH.VeryFar") }
+      { value: "veryFar", label: game.i18n.localize("DH.VeryFar") },
     ];
 
     context.damageTypeOptions = [
       { value: "", label: game.i18n.localize("DH.DamageType") },
       { value: "physical", label: game.i18n.localize("DH.Physical") },
-      { value: "magical", label: game.i18n.localize("DH.Magical") }
+      { value: "magical", label: game.i18n.localize("DH.Magical") },
     ];
 
     return context;
@@ -53,40 +52,50 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
     if (!this.isEditable) return;
 
     // Damage modifier system event listeners
-    html.find('.damage-value-display').on('click', this._onDamageValueClick.bind(this));
+    html
+      .find(".damage-value-display")
+      .on("click", this._onDamageValueClick.bind(this));
   }
 
   // Damage stuff
   async _onDamageValueClick(event) {
     event.preventDefault();
     const displayElement = event.currentTarget;
-    
+
     // Get config
     const config = {
       field: displayElement.dataset.field,
       label: displayElement.dataset.label,
-      type: displayElement.dataset.editType || 'damage',
-      hasModifiers: displayElement.dataset.hasModifiers !== 'false',
-      min: displayElement.dataset.min ? parseInt(displayElement.dataset.min) : null,
-      max: displayElement.dataset.max ? parseInt(displayElement.dataset.max) : null
+      type: displayElement.dataset.editType || "damage",
+      hasModifiers: displayElement.dataset.hasModifiers !== "false",
+      min: displayElement.dataset.min
+        ? parseInt(displayElement.dataset.min)
+        : null,
+      max: displayElement.dataset.max
+        ? parseInt(displayElement.dataset.max)
+        : null,
     };
-    
+
     // Default label
     if (!config.label) {
-      config.label = 'Weapon Damage';
+      config.label = "Weapon Damage";
     }
-    
+
     // Get damage data
     let damageData = foundry.utils.getProperty(this.item, config.field);
-    
+
     // Fix format
-    if (typeof damageData === 'object' && damageData !== null && 'baseValue' in damageData) {
+    if (
+      typeof damageData === "object" &&
+      damageData !== null &&
+      "baseValue" in damageData
+    ) {
       // Check corruption
-      const baseValue = damageData.baseValue || '1d8';
+      const baseValue = damageData.baseValue || "1d8";
       const modifiers = damageData.modifiers || [];
-      
+
       // Fix corrupted base
-      if (baseValue.includes(' ') && modifiers.length === 0) {
+      if (baseValue.includes(" ") && modifiers.length === 0) {
         // Extract dice
         const match = baseValue.match(/^(\d*d\d+)/);
         if (match) {
@@ -95,36 +104,40 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
           damageData.value = match[1];
         }
       }
-    } else if (typeof damageData === 'object' && damageData !== null && 'value' in damageData) {
+    } else if (
+      typeof damageData === "object" &&
+      damageData !== null &&
+      "value" in damageData
+    ) {
       // Legacy case
-      const displayValue = damageData.value || '1d8';
+      const displayValue = damageData.value || "1d8";
       damageData = {
         baseValue: displayValue,
         modifiers: damageData.modifiers || [],
-        value: displayValue
+        value: displayValue,
       };
     } else {
       // String case
-      const simpleValue = damageData || '1d8';
+      const simpleValue = damageData || "1d8";
       damageData = {
         baseValue: simpleValue,
         modifiers: [],
-        value: simpleValue
+        value: simpleValue,
       };
     }
-    
+
     // Fix modifiers
     if (!Array.isArray(damageData.modifiers)) {
       damageData.modifiers = [];
     }
-    
+
     // Show popup
     this._showDamageModifierEditPopup(config, damageData, displayElement);
   }
 
   _showDamageModifierEditPopup(config, damageData, displayElement) {
     // Create popup
-    let overlay = this.element.find('.damage-edit-popup-overlay');
+    let overlay = this.element.find(".damage-edit-popup-overlay");
     if (overlay.length === 0) {
       const popupHtml = `
         <div class="damage-edit-popup-overlay attribute-edit-popup-overlay" style="display: none;">
@@ -156,43 +169,43 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
         </div>
       `;
       this.element.append(popupHtml);
-      overlay = this.element.find('.damage-edit-popup-overlay');
+      overlay = this.element.find(".damage-edit-popup-overlay");
     }
-    
+
     // Extract attribute name for data access
-    const pathParts = config.field.split('.');
+    const pathParts = config.field.split(".");
     const attributeName = pathParts[pathParts.length - 1]; // e.g., "system.damage" -> "damage"
-    
+
     // Set up the popup content
-    overlay.find('.damage-edit-label').text(config.label);
-    
+    overlay.find(".damage-edit-label").text(config.label);
+
     // Set base value from structured damage data
-    const baseInput = overlay.find('.damage-base-input');
-    const baseValue = damageData.baseValue || '1d8';
-    
+    const baseInput = overlay.find(".damage-base-input");
+    const baseValue = damageData.baseValue || "1d8";
+
     baseInput.val(baseValue);
-    
+
     // Store config for later use
-    overlay.data('config', config);
-    overlay.data('attribute-name', attributeName);
-    overlay.data('field-name', config.field);
-    overlay.data('display-element', displayElement);
-    
+    overlay.data("config", config);
+    overlay.data("attribute-name", attributeName);
+    overlay.data("field-name", config.field);
+    overlay.data("display-element", displayElement);
+
     // Load existing modifiers
     this._loadDamageModifiers(overlay, damageData.modifiers || []);
-    
+
     // Calculate and display total
     this._updateDamageTotal(overlay);
-    
+
     // Show the popup with animation
     overlay.show();
-    const popup = overlay.find('.damage-edit-popup');
-    
+    const popup = overlay.find(".damage-edit-popup");
+
     // Animate in with JavaScript for smooth backdrop-filter
     this._animatePopupIn(popup, () => {
       baseInput.focus().select();
     });
-    
+
     // Set up event handlers
     this._setupDamagePopupEventHandlers(overlay);
   }
@@ -200,17 +213,17 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
   _animatePopupIn(popup, callback) {
     popup.css({
       opacity: 0,
-      transform: 'translate(-50%, -50%) scale(0.8)'
+      transform: "translate(-50%, -50%) scale(0.8)",
     });
-    
+
     // Use requestAnimationFrame for smooth animation
     requestAnimationFrame(() => {
       popup.css({
-        transition: 'opacity 0.2s ease-out, transform 0.2s ease-out',
+        transition: "opacity 0.2s ease-out, transform 0.2s ease-out",
         opacity: 1,
-        transform: 'translate(-50%, -50%) scale(1)'
+        transform: "translate(-50%, -50%) scale(1)",
       });
-      
+
       if (callback) {
         setTimeout(callback, 200);
       }
@@ -219,32 +232,32 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
 
   _setupDamagePopupEventHandlers(overlay) {
     // Clear any existing handlers
-    overlay.off('.damage-edit');
-    overlay.find('*').off('.damage-edit');
-    
+    overlay.off(".damage-edit");
+    overlay.find("*").off(".damage-edit");
+
     // Base value input handler
-    const baseInput = overlay.find('.damage-base-input');
-    baseInput.on('input', () => this._updateDamageTotal(overlay));
-    
+    const baseInput = overlay.find(".damage-base-input");
+    baseInput.on("input", () => this._updateDamageTotal(overlay));
+
     // Keyboard shortcuts
-    overlay.on('keydown', (e) => {
-      if (e.key === 'Escape') {
+    overlay.on("keydown", (e) => {
+      if (e.key === "Escape") {
         this._hideDamageEditPopup(overlay);
       }
     });
-    
+
     // Add modifier button
-    overlay.find('.add-damage-modifier-btn').on('click', () => {
+    overlay.find(".add-damage-modifier-btn").on("click", () => {
       this._addDamageModifier(overlay);
     });
-    
+
     // Close button
-    overlay.find('.damage-edit-close').on('click', () => {
+    overlay.find(".damage-edit-close").on("click", () => {
       this._submitDamageEdit(overlay);
     });
-    
+
     // Click outside to close (only on the overlay background)
-    overlay.on('click', (e) => {
+    overlay.on("click", (e) => {
       if (e.target === overlay[0]) {
         this._submitDamageEdit(overlay);
       }
@@ -252,170 +265,186 @@ export class SimpleWeaponSheet extends SimpleItemSheet {
   }
 
   _loadDamageModifiers(overlay, modifiers) {
-    const modifiersList = overlay.find('.damage-modifiers-list');
+    const modifiersList = overlay.find(".damage-modifiers-list");
     modifiersList.empty();
-    
+
     // Ensure modifiers is an array
     if (!Array.isArray(modifiers)) {
       modifiers = [];
     }
-    
+
     modifiers.forEach((modifier, index) => {
       this._createDamageModifierRow(overlay, modifier, index);
     });
   }
 
   _createDamageModifierRow(overlay, modifier, index) {
-    const modifiersList = overlay.find('.damage-modifiers-list');
+    const modifiersList = overlay.find(".damage-modifiers-list");
     const row = $(`
-      <div class="damage-modifier-row modifier-row ${modifier.enabled === false ? 'disabled' : ''}" data-index="${index}">
-        <input type="text" class="damage-modifier-name modifier-name" placeholder="Modifier name" value="${modifier.name || ''}" />
-        <input type="text" class="damage-modifier-value modifier-value" placeholder="±1 or ±1d4" value="${modifier.value || ''}" />
-        <input type="checkbox" class="damage-modifier-toggle modifier-toggle" ${modifier.enabled !== false ? 'checked' : ''} />
+      <div class="damage-modifier-row modifier-row ${
+        modifier.enabled === false ? "disabled" : ""
+      }" data-index="${index}">
+        <input type="text" class="damage-modifier-name modifier-name" placeholder="Modifier name" value="${
+          modifier.name || ""
+        }" />
+        <input type="text" class="damage-modifier-value modifier-value" placeholder="±1 or ±1d4" value="${
+          modifier.value || ""
+        }" />
+        <input type="checkbox" class="damage-modifier-toggle modifier-toggle" ${
+          modifier.enabled !== false ? "checked" : ""
+        } />
         <button type="button" class="damage-modifier-delete modifier-delete">×</button>
       </div>
     `);
-    
+
     // Simple event handlers without propagation issues
-    row.find('.damage-modifier-name, .damage-modifier-value').on('input', () => this._updateDamageTotal(overlay));
-    
-    row.find('.damage-modifier-toggle').on('click change', (e) => {
+    row
+      .find(".damage-modifier-name, .damage-modifier-value")
+      .on("input", () => this._updateDamageTotal(overlay));
+
+    row.find(".damage-modifier-toggle").on("click change", (e) => {
       e.stopPropagation();
       const checkbox = $(e.currentTarget);
-      const isEnabled = checkbox.prop('checked');
-      row.toggleClass('disabled', !isEnabled);
+      const isEnabled = checkbox.prop("checked");
+      row.toggleClass("disabled", !isEnabled);
       this._updateDamageTotal(overlay);
     });
-    
-    row.find('.damage-modifier-delete').on('click', (e) => {
+
+    row.find(".damage-modifier-delete").on("click", (e) => {
       e.stopPropagation();
       row.remove();
       this._updateDamageTotal(overlay);
     });
-    
+
     modifiersList.append(row);
   }
 
   _addDamageModifier(overlay) {
     const newModifier = {
-      name: 'Modifier',
-      value: '+1',
-      enabled: true
+      name: "Modifier",
+      value: "+1",
+      enabled: true,
     };
-    
-    const modifiersList = overlay.find('.damage-modifiers-list');
+
+    const modifiersList = overlay.find(".damage-modifiers-list");
     const index = modifiersList.children().length;
-    
+
     this._createDamageModifierRow(overlay, newModifier, index);
-    
+
     // Focus the name input of the new modifier and select the text
     const newRow = modifiersList.children().last();
-    const nameInput = newRow.find('.damage-modifier-name');
+    const nameInput = newRow.find(".damage-modifier-name");
     nameInput.focus().select();
   }
 
   _updateDamageTotal(overlay) {
-    const baseValue = overlay.find('.damage-base-input').val().trim() || '1d8';
+    const baseValue = overlay.find(".damage-base-input").val().trim() || "1d8";
     let modifierParts = [];
-    
-    overlay.find('.damage-modifier-row').each((index, row) => {
+
+    overlay.find(".damage-modifier-row").each((index, row) => {
       const $row = $(row);
-      const isEnabled = $row.find('.damage-modifier-toggle').is(':checked');
-      
+      const isEnabled = $row.find(".damage-modifier-toggle").is(":checked");
+
       if (isEnabled) {
-        const value = $row.find('.damage-modifier-value').val().trim();
+        const value = $row.find(".damage-modifier-value").val().trim();
         if (value) {
           // Ensure proper formatting - add + if it doesn't start with + or -
           let formattedValue = value;
-          if (value && !value.startsWith('+') && !value.startsWith('-')) {
-            formattedValue = '+' + value;
+          if (value && !value.startsWith("+") && !value.startsWith("-")) {
+            formattedValue = "+" + value;
           }
           modifierParts.push(formattedValue);
         }
       }
     });
-    
+
     // Build the total formula
     let totalFormula = baseValue;
     if (modifierParts.length > 0) {
-      totalFormula += ' ' + modifierParts.join(' ');
+      totalFormula += " " + modifierParts.join(" ");
     }
-    
+
     // Update the popup preview total
-    overlay.find('.damage-total-value').text(totalFormula);
-    
+    overlay.find(".damage-total-value").text(totalFormula);
+
     return totalFormula;
   }
 
   async _submitDamageEdit(overlay) {
-    const config = overlay.data('config');
-    const attributeName = overlay.data('attribute-name');
-    const baseValue = overlay.find('.damage-base-input').val().trim() || '1d8';
-    
+    const config = overlay.data("config");
+    const attributeName = overlay.data("attribute-name");
+    const baseValue = overlay.find(".damage-base-input").val().trim() || "1d8";
+
     // Collect modifiers
     const modifiers = [];
-    overlay.find('.damage-modifier-row').each((index, row) => {
+    overlay.find(".damage-modifier-row").each((index, row) => {
       const $row = $(row);
-      let name = $row.find('.damage-modifier-name').val().trim();
-      const value = $row.find('.damage-modifier-value').val().trim();
-      const enabled = $row.find('.damage-modifier-toggle').is(':checked');
-      
+      let name = $row.find(".damage-modifier-name").val().trim();
+      const value = $row.find(".damage-modifier-value").val().trim();
+      const enabled = $row.find(".damage-modifier-toggle").is(":checked");
+
       // Only save modifiers that have a value (even if name is empty)
       if (value) {
         // Default name if empty
         if (!name) {
-          name = 'Modifier';
+          name = "Modifier";
         }
         modifiers.push({
           name: name,
           value: value,
-          enabled: enabled
+          enabled: enabled,
         });
       }
     });
-    
+
     // Calculate final formula for the value field
     let totalFormula = baseValue;
-    const enabledModifiers = modifiers.filter(mod => mod.enabled !== false && mod.value);
-    
+    const enabledModifiers = modifiers.filter(
+      (mod) => mod.enabled !== false && mod.value
+    );
+
     if (enabledModifiers.length > 0) {
-      enabledModifiers.forEach(modifier => {
+      enabledModifiers.forEach((modifier) => {
         let modValue = modifier.value.trim();
         // Ensure proper formatting - add + if it doesn't start with + or -
-        if (modValue && !modValue.startsWith('+') && !modValue.startsWith('-')) {
-          modValue = '+' + modValue;
+        if (
+          modValue &&
+          !modValue.startsWith("+") &&
+          !modValue.startsWith("-")
+        ) {
+          modValue = "+" + modValue;
         }
-        totalFormula += ' ' + modValue;
+        totalFormula += " " + modValue;
       });
     }
-    
+
     // Build update data based on the field path - for weapons, it's system.damage
     const updateData = {
       [`${config.field}.baseValue`]: baseValue,
       [`${config.field}.modifiers`]: modifiers,
-      [`${config.field}.value`]: totalFormula
+      [`${config.field}.value`]: totalFormula,
     };
-    
+
     await this.item.update(updateData);
-    
+
     this._hideDamageEditPopup(overlay);
   }
 
   _hideDamageEditPopup(overlay) {
-    const popup = overlay.find('.damage-edit-popup');
-    
+    const popup = overlay.find(".damage-edit-popup");
+
     // Animate out
     popup.css({
-      transition: 'opacity 0.15s ease-in, transform 0.15s ease-in',
+      transition: "opacity 0.15s ease-in, transform 0.15s ease-in",
       opacity: 0,
-      transform: 'translate(-50%, -50%) scale(0.8)'
+      transform: "translate(-50%, -50%) scale(0.8)",
     });
-    
+
     setTimeout(() => {
       overlay.hide();
       // Clean up event handlers
-      overlay.off('.damage-edit');
-      overlay.find('*').off('.damage-edit');
+      overlay.off(".damage-edit");
+      overlay.find("*").off(".damage-edit");
     }, 150);
   }
-} 
+}
