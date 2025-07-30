@@ -7,7 +7,7 @@ export class DaggerheartMigrations {
     let needsUpdate = false;
     const systemData = document.system;
     const currentVersion =
-      document.getFlag("daggerheart", "migrationVersion") || "1.0.0";
+      document.getFlag("daggerheart-7th-sea", "migrationVersion") || "1.0.0";
 
     if (this.compareVersions(currentVersion, this.CURRENT_VERSION) < 0) {
       console.log(

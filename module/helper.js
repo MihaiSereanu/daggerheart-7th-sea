@@ -620,7 +620,7 @@ export class EntitySheetHelper {
     // Identify the template Actor types
     const collection = game.collections.get(this.documentName);
     const templates = collection.filter((a) =>
-      a.getFlag("daggerheart", "isTemplate")
+      a.getFlag("daggerheart-7th-sea", "isTemplate")
     );
     if (templates.length > 0) {
       if (Object.keys(types).length > 0) {

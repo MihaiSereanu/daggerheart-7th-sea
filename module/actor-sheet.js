@@ -2668,7 +2668,7 @@ await game.daggerheart.rollHandler.dualityWithDialog({
 
   async _loadUiState() {
     if (!this.actor) return;
-    const uiState = this.actor.getFlag("daggerheart", "uiState") || {};
+    const uiState = this.actor.getFlag("daggerheart-7th-sea", "uiState") || {};
 
     this._vaultOpen = uiState.vaultOpen ?? false;
 
