@@ -1,5 +1,5 @@
 import { EntitySheetHelper } from "./helper.js";
-import {ATTRIBUTE_TYPES} from "./constants.js";
+import { ATTRIBUTE_TYPES } from "./constants.js";
 import { SheetTracker } from "./sheet-tracker.js";
 
 /**
@@ -7,12 +7,11 @@ import { SheetTracker } from "./sheet-tracker.js";
  * @extends {ItemSheet}
  */
 export class SimpleItemSheet extends foundry.appv1.sheets.ItemSheet {
-
   /** @inheritdoc */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-          classes: ["daggerheart", "sheet", "item"],
-    template: "systems/daggerheart/templates/item-sheet.html",
+      classes: ["daggerheart", "sheet", "item"],
+      template: "systems/daggerheart-7th-sea/templates/item-sheet.html",
       width: 350,
       height: 550,
       resizable: true,
@@ -28,14 +27,16 @@ export class SimpleItemSheet extends foundry.appv1.sheets.ItemSheet {
     EntitySheetHelper.getAttributeData(context.data);
     context.systemData = context.data.system;
     context.dtypes = ATTRIBUTE_TYPES;
-    context.descriptionHTML = await foundry.applications.ux.TextEditor.implementation.enrichHTML(context.systemData.description, {
-      secrets: this.document.isOwner,
-      async: true
-    });
+    context.descriptionHTML =
+      await foundry.applications.ux.TextEditor.implementation.enrichHTML(
+        context.systemData.description,
+        {
+          secrets: this.document.isOwner,
+          async: true,
+        }
+      );
     return context;
   }
-
-
 
   /* -------------------------------------------- */
 
@@ -62,11 +63,11 @@ export class SimpleItemSheet extends foundry.appv1.sheets.ItemSheet {
     const fp = new FilePicker({
       type: "image",
       current: this.object.img,
-      callback: path => {
-        this.object.update({"img": path});
+      callback: (path) => {
+        this.object.update({ img: path });
       },
       top: this.position.top + 40,
-      left: this.position.left + 10
+      left: this.position.left + 10,
     });
     return fp.browse();
   }
@@ -93,32 +94,54 @@ export class SimpleItemSheet extends foundry.appv1.sheets.ItemSheet {
     this.sheetTracker.initialize();
 
     // Everything below here is only needed if the sheet is editable
-    if ( !this.isEditable ) return;
+    if (!this.isEditable) return;
 
     // Attribute Management
-    html.find(".attributes").on("click", ".attribute-control", EntitySheetHelper.onClickAttributeControl.bind(this));
-    html.find(".groups").on("click", ".group-control", EntitySheetHelper.onClickAttributeGroupControl.bind(this));
-    html.find(".attributes").on("click", "a.attribute-roll", EntitySheetHelper.onAttributeRoll.bind(this));
+    html
+      .find(".attributes")
+      .on(
+        "click",
+        ".attribute-control",
+        EntitySheetHelper.onClickAttributeControl.bind(this)
+      );
+    html
+      .find(".groups")
+      .on(
+        "click",
+        ".group-control",
+        EntitySheetHelper.onClickAttributeGroupControl.bind(this)
+      );
+    html
+      .find(".attributes")
+      .on(
+        "click",
+        "a.attribute-roll",
+        EntitySheetHelper.onAttributeRoll.bind(this)
+      );
 
     // Image Click Finder - both left click and right click for image upload
-    html.find('.profile-img').on('contextmenu', event => {
+    html.find(".profile-img").on("contextmenu", (event) => {
       event.preventDefault(); // Prevents the browser's context menu from opening
       this._onProfileImageClick(event.target);
     });
-    
+
     // Also allow left click for easier image upload
-    html.find('.profile-img').on('click', event => {
+    html.find(".profile-img").on("click", (event) => {
       event.preventDefault();
       this._onImageEdit(event);
     });
-    
+
     // Add draggable for Macro creation
     html.find(".attributes a.attribute-roll").each((i, a) => {
       a.setAttribute("draggable", true);
-      a.addEventListener("dragstart", ev => {
-        let dragData = ev.currentTarget.dataset;
-        ev.dataTransfer.setData('text/plain', JSON.stringify(dragData));
-      }, false);
+      a.addEventListener(
+        "dragstart",
+        (ev) => {
+          let dragData = ev.currentTarget.dataset;
+          ev.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        },
+        false
+      );
     });
   }
 

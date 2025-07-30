@@ -51,7 +51,7 @@ export class SimpleActorSheet extends foundry.appv1.sheets.ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["daggerheart", "sheet", "actor"],
-      template: "systems/daggerheart/templates/actor-sheet.html",
+      template: "systems/daggerheart-7th-sea/templates/actor-sheet.html",
       width: 690,
       height: 915,
       tabs: [
@@ -189,17 +189,6 @@ export class SimpleActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     await this._loadUiState();
 
-    const vaultList = html.find('.item-list[data-location="vault"]');
-    const icon = html.find(".vault-toggle i");
-
-    if (this._vaultOpen) {
-      vaultList.removeClass("vault-collapsed");
-      icon.removeClass("fa-chevron-down").addClass("fa-chevron-up");
-    } else {
-      vaultList.addClass("vault-collapsed");
-      icon.removeClass("fa-chevron-up").addClass("fa-chevron-down");
-    }
-
     this._updateDynamicSpacing(false);
 
     this._enableTransitions();
@@ -267,8 +256,6 @@ export class SimpleActorSheet extends foundry.appv1.sheets.ActorSheet {
       .click(this._onToggleDescription.bind(this));
 
     html.find(".remove-card").click(this._onRemoveCard.bind(this));
-
-    html.find(".vault-toggle").click(this._onToggleVault.bind(this));
 
     html.find(".category-toggle").click(this._onToggleCategory.bind(this));
 
@@ -768,39 +755,6 @@ await game.daggerheart.rollHandler.dualityWithDialog({
           });
           if (!confirmResult) return;
           return item.delete();
-        }
-        break;
-      case "send-to-vault":
-        if (item) {
-          const confirmResult = await DaggerheartDialogHelper.showDialog({
-            title: "Move to Vault",
-            content: `<p>Are you sure you want to move <strong>${item.name}</strong> to the vault?</p>`,
-            dialogClass: "confirm-dialog",
-            buttons: {
-              confirm: {
-                label: "Move",
-                icon: '<i class="fas fa-archive"></i>',
-                callback: () => true,
-              },
-              cancel: {
-                label: "Cancel",
-                callback: () => null,
-              },
-            },
-            default: "cancel",
-          });
-          if (!confirmResult) return;
-
-          return item.update({
-            "system.location": "vault",
-          });
-        }
-        break;
-      case "send-to-domain":
-        if (item && item.system.location === "vault") {
-          return item.update({
-            "system.location": "abilities",
-          });
         }
         break;
     }
@@ -2281,25 +2235,6 @@ await game.daggerheart.rollHandler.dualityWithDialog({
     return targetingText;
   }
 
-  async _onToggleVault(event) {
-    event.preventDefault();
-    const button = $(event.currentTarget);
-    const icon = button.find("i");
-    const vaultList = this.element.find('.item-list[data-location="vault"]');
-
-    if (vaultList.hasClass("vault-collapsed")) {
-      vaultList.removeClass("vault-collapsed");
-      icon.removeClass("fa-chevron-down").addClass("fa-chevron-up");
-      this._vaultOpen = true;
-    } else {
-      vaultList.addClass("vault-collapsed");
-      icon.removeClass("fa-chevron-up").addClass("fa-chevron-down");
-      this._vaultOpen = false;
-    }
-
-    await this._saveUiState();
-  }
-
   async _onToggleCategory(event) {
     event.preventDefault();
     const button = $(event.currentTarget);
@@ -2735,7 +2670,7 @@ export class NPCActorSheet extends SimpleActorSheet {
 
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["daggerheart", "sheet", "npc"],
-      template: "systems/daggerheart/templates/actor-sheet-npc.html",
+      template: "systems/daggerheart-7th-sea/templates/actor-sheet-npc.html",
       width: width,
       height: height,
       tabs: [

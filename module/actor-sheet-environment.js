@@ -4,7 +4,8 @@ export class EnvironmentActorSheet extends SimpleActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["daggerheart-7th-sea", "sheet", "environment"],
-      template: "systems/daggerheart/templates/actor-sheet-environment.html",
+      template:
+        "systems/daggerheart-7th-sea/templates/actor-sheet-environment.html",
       width: 750,
       height: 850,
       tabs: [

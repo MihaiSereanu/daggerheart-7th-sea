@@ -1270,7 +1270,6 @@ input[type=search]:focus {
 .item .window-content {
   padding: 1em 2em;
 }
-
 /* Window Header Styling */
 .actor .window-header,
 .npc .window-header,
@@ -3091,6 +3090,7 @@ body.game .app textarea {
   border: 1px solid var(--dh-color-gold);
   border-right: none;
   border-radius: 10px 0px 0px 10px;
+  width: 20%;
 }
 
 .domain-abilities-title {

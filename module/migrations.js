@@ -217,8 +217,6 @@ export class DaggerheartMigrations {
         return "worn";
       case "inventory":
         return "backpack";
-      case "vault":
-        return "vault";
       case "class":
         return "class";
       case "subclass":

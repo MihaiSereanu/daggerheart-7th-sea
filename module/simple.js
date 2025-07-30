@@ -7,7 +7,19 @@ import { SimpleActorSheet, NPCActorSheet } from "./actor-sheet.js";
 import { CompanionActorSheet } from "./actor-sheet-companion.js";
 import { EnvironmentActorSheet } from "./actor-sheet-environment.js";
 import { preloadHandlebarsTemplates } from "./templates.js";
-import { createDaggerheartMacro, createSpendFearMacro, createGainFearMacro, createSpendStressMacro, createClearStressMacro, createSpendHopeMacro, createGainHopeMacro, spendStress, clearStress, spendHope, gainHope } from "./spending-system.js";
+import {
+  createDaggerheartMacro,
+  createSpendFearMacro,
+  createGainFearMacro,
+  createSpendStressMacro,
+  createClearStressMacro,
+  createSpendHopeMacro,
+  createGainHopeMacro,
+  spendStress,
+  clearStress,
+  spendHope,
+  gainHope,
+} from "./spending-system.js";
 import { SimpleToken, SimpleTokenDocument } from "./token.js";
 import { CounterUI } from "./counter-ui.js";
 import { TokenCounterUI } from "./token-counter-ui.js";
@@ -20,15 +32,39 @@ import { EntitySheetHelper, buildItemCardChat } from "./helper.js";
 import { ModifierManager } from "./modifierManager.js";
 import { ArmorCleanup } from "./armorCleanup.js";
 
-import { _rollHope, _rollFear, _rollDuality, _rollNPC, _checkCritical, _enableForcedCritical, _disableForcedCritical, _isForcedCriticalActive, _quickRoll, _dualityWithDialog, _npcRollWithDialog, _waitFor3dDice } from './rollHandler.js';
-import { applyDamage, applyHealing, applyDirectDamage, extractRollTotal, rollDamage, rollHealing, undoDamageHealing, debugUndoData } from './damage-application.js';
+import {
+  _rollHope,
+  _rollFear,
+  _rollDuality,
+  _rollNPC,
+  _checkCritical,
+  _enableForcedCritical,
+  _disableForcedCritical,
+  _isForcedCriticalActive,
+  _quickRoll,
+  _dualityWithDialog,
+  _npcRollWithDialog,
+  _waitFor3dDice,
+} from "./rollHandler.js";
+import {
+  applyDamage,
+  applyHealing,
+  applyDirectDamage,
+  extractRollTotal,
+  rollDamage,
+  rollHealing,
+  undoDamageHealing,
+  debugUndoData,
+} from "./damage-application.js";
 
 function _getTierOfPlay(actor = null, level = null) {
   let characterLevel = level;
 
   if (characterLevel === null || characterLevel === undefined) {
     if (!actor) {
-      console.warn("Daggerheart | getTierOfPlay: No actor or level provided, defaulting to tier 1");
+      console.warn(
+        "Daggerheart | getTierOfPlay: No actor or level provided, defaulting to tier 1"
+      );
       return 1;
     }
     characterLevel = actor.system?.level?.value || 1;
@@ -49,7 +85,6 @@ Hooks.once("init", async function () {
   console.log(`Initializing Simple Daggerheart System`);
 
   if (game.dice3d) {
-
     game.dice3d.addColorset({
       name: "Hope",
       category: "Hope Die",
@@ -62,7 +97,7 @@ Hooks.once("init", async function () {
       material: "glass",
       font: "Modesto Condensed",
       colorset: "custom",
-      system: "standard"
+      system: "standard",
     });
 
     game.dice3d.addColorset({
@@ -77,7 +112,7 @@ Hooks.once("init", async function () {
       material: "metal",
       font: "Modesto Condensed",
       colorset: "custom",
-      system: "standard"
+      system: "standard",
     });
 
     game.dice3d.addColorset({
@@ -97,22 +132,22 @@ Hooks.once("init", async function () {
   CONFIG.statusEffects.push({
     id: "hidden",
     label: "Hidden",
-    icon: "icons/svg/invisible.svg"
+    icon: "icons/svg/invisible.svg",
   });
   CONFIG.statusEffects.push({
     id: "restrained",
     label: "Restrained",
-    icon: "icons/svg/padlock.svg"
+    icon: "icons/svg/padlock.svg",
   });
   CONFIG.statusEffects.push({
     id: "vulnerable",
     label: "Vulnerable",
-    icon: "icons/svg/stoned.svg"
+    icon: "icons/svg/stoned.svg",
   });
 
   CONFIG.Combat.initiative = {
     formula: "1d20",
-    decimals: 2
+    decimals: 2,
   };
 
   game.daggerheart = {
@@ -144,7 +179,7 @@ Hooks.once("init", async function () {
       quickRoll: _quickRoll,
       dualityWithDialog: _dualityWithDialog,
       npcRollWithDialog: _npcRollWithDialog,
-      waitFor3dDice: _waitFor3dDice
+      waitFor3dDice: _waitFor3dDice,
     },
     damageApplication: {
       applyDamage: applyDamage,
@@ -153,10 +188,10 @@ Hooks.once("init", async function () {
       rollHealing: rollHealing,
       extractRollTotal: extractRollTotal,
       undoDamageHealing: undoDamageHealing,
-      debugUndoData: debugUndoData
+      debugUndoData: debugUndoData,
     },
     getTierOfPlay: _getTierOfPlay,
-    EntitySheetHelper: EntitySheetHelper
+    EntitySheetHelper: EntitySheetHelper,
   };
 
   globalThis.daggerheart.EntitySheetHelper = EntitySheetHelper;
@@ -166,7 +201,7 @@ Hooks.once("init", async function () {
     character: "ACTOR.TypeCharacter",
     npc: "ACTOR.TypeNpc",
     companion: "ACTOR.TypeCompanion",
-    environment: "ACTOR.TypeEnvironment"
+    environment: "ACTOR.TypeEnvironment",
   };
   CONFIG.Item.documentClass = SimpleItem;
   CONFIG.Item.typeLabels = {
@@ -174,54 +209,96 @@ Hooks.once("init", async function () {
     inventory: "ITEM.TypeInventory",
     worn: "ITEM.TypeWorn",
     domain: "ITEM.TypeDomain",
-    vault: "ITEM.Vault",
     ancestry: "ITEM.TypeAncestry",
     community: "ITEM.TypeCommunity",
     class: "ITEM.TypeClass",
     subclass: "ITEM.TypeSubclass",
     weapon: "ITEM.TypeWeapon",
-    armor: "ITEM.TypeArmor"
+    armor: "ITEM.TypeArmor",
   };
   CONFIG.Token.documentClass = SimpleTokenDocument;
   CONFIG.Token.objectClass = SimpleToken;
 
-  foundry.documents.collections.Actors.unregisterSheet("core", foundry.applications.sheets.ActorSheetV2);
-  foundry.documents.collections.Actors.registerSheet("daggerheart", SimpleActorSheet, {
-    types: ["character"],
-    makeDefault: true,
-    label: "SHEET.Actor.character"
-  });
-  foundry.documents.collections.Actors.registerSheet("daggerheart", NPCActorSheet, {
-    types: ["npc"],
-    makeDefault: true,
-    label: "SHEET.Actor.npc"
-  });
-  foundry.documents.collections.Actors.registerSheet("daggerheart", CompanionActorSheet, {
-    types: ["companion"],
-    makeDefault: true,
-    label: "SHEET.Actor.companion"
-  });
-  foundry.documents.collections.Actors.registerSheet("daggerheart", EnvironmentActorSheet, {
-    types: ["environment"],
-    makeDefault: true,
-    label: "SHEET.Actor.environment"
-  });
-  foundry.documents.collections.Items.unregisterSheet("core", foundry.applications.sheets.ItemSheetV2);
-  foundry.documents.collections.Items.registerSheet("daggerheart", SimpleItemSheet, {
-    types: ["item", "inventory", "worn", "domain", "vault", "ancestry", "community", "class", "subclass"],
-    makeDefault: true,
-    label: "SHEET.Item.default"
-  });
-  foundry.documents.collections.Items.registerSheet("daggerheart", SimpleWeaponSheet, {
-    types: ["weapon"],
-    makeDefault: true,
-    label: "SHEET.Item.weapon"
-  });
-  foundry.documents.collections.Items.registerSheet("daggerheart", SimpleArmorSheet, {
-    types: ["armor"],
-    makeDefault: true,
-    label: "SHEET.Item.armor"
-  });
+  foundry.documents.collections.Actors.unregisterSheet(
+    "core",
+    foundry.applications.sheets.ActorSheetV2
+  );
+  foundry.documents.collections.Actors.registerSheet(
+    "daggerheart",
+    SimpleActorSheet,
+    {
+      types: ["character"],
+      makeDefault: true,
+      label: "SHEET.Actor.character",
+    }
+  );
+  foundry.documents.collections.Actors.registerSheet(
+    "daggerheart",
+    NPCActorSheet,
+    {
+      types: ["npc"],
+      makeDefault: true,
+      label: "SHEET.Actor.npc",
+    }
+  );
+  foundry.documents.collections.Actors.registerSheet(
+    "daggerheart",
+    CompanionActorSheet,
+    {
+      types: ["companion"],
+      makeDefault: true,
+      label: "SHEET.Actor.companion",
+    }
+  );
+  foundry.documents.collections.Actors.registerSheet(
+    "daggerheart",
+    EnvironmentActorSheet,
+    {
+      types: ["environment"],
+      makeDefault: true,
+      label: "SHEET.Actor.environment",
+    }
+  );
+  foundry.documents.collections.Items.unregisterSheet(
+    "core",
+    foundry.applications.sheets.ItemSheetV2
+  );
+  foundry.documents.collections.Items.registerSheet(
+    "daggerheart",
+    SimpleItemSheet,
+    {
+      types: [
+        "item",
+        "inventory",
+        "worn",
+        "domain",
+        "ancestry",
+        "community",
+        "class",
+        "subclass",
+      ],
+      makeDefault: true,
+      label: "SHEET.Item.default",
+    }
+  );
+  foundry.documents.collections.Items.registerSheet(
+    "daggerheart",
+    SimpleWeaponSheet,
+    {
+      types: ["weapon"],
+      makeDefault: true,
+      label: "SHEET.Item.weapon",
+    }
+  );
+  foundry.documents.collections.Items.registerSheet(
+    "daggerheart",
+    SimpleArmorSheet,
+    {
+      types: ["armor"],
+      makeDefault: true,
+      label: "SHEET.Item.armor",
+    }
+  );
 
   game.settings.register("daggerheart", "macroShorthand", {
     name: "SETTINGS.SimpleMacroShorthandN",
@@ -229,7 +306,7 @@ Hooks.once("init", async function () {
     scope: "world",
     type: Boolean,
     default: true,
-    config: true
+    config: true,
   });
 
   game.settings.register("daggerheart", "counterValue", {
@@ -238,7 +315,7 @@ Hooks.once("init", async function () {
     scope: "world",
     type: Number,
     default: 0,
-    config: false
+    config: false,
   });
 
   game.settings.register("daggerheart", "countdownTrackers", {
@@ -247,7 +324,7 @@ Hooks.once("init", async function () {
     scope: "world",
     type: Array,
     default: [],
-    config: false
+    config: false,
   });
 
   game.settings.register("daggerheart", "initFormula", {
@@ -257,7 +334,7 @@ Hooks.once("init", async function () {
     type: String,
     default: "1d20",
     config: true,
-    onChange: formula => _simpleUpdateInit(formula, true)
+    onChange: (formula) => _simpleUpdateInit(formula, true),
   });
 
   game.settings.register("daggerheart", "advantageDieTypes", {
@@ -275,13 +352,16 @@ Hooks.once("init", async function () {
   function _simpleUpdateInit(formula, notify = false) {
     const isValid = Roll.validate(formula);
     if (!isValid) {
-      if (notify) ui.notifications.error(`${game.i18n.localize("SIMPLE.NotifyInitFormulaInvalid")}: ${formula}`);
+      if (notify)
+        ui.notifications.error(
+          `${game.i18n.localize("SIMPLE.NotifyInitFormulaInvalid")}: ${formula}`
+        );
       return;
     }
     CONFIG.Combat.initiative.formula = formula;
   }
 
-  Handlebars.registerHelper('slugify', function (value) {
+  Handlebars.registerHelper("slugify", function (value) {
     return value.slugify({ strict: true });
   });
 
@@ -289,68 +369,57 @@ Hooks.once("init", async function () {
 });
 
 Hooks.on("updateActor", (actor, data, options, userId) => {
-
-  if (data.system && (
-    data.system["weapon-main"] ||
-    data.system["weapon-off"]
-  )) {
-
-    Object.values(actor.apps).forEach(app => {
+  if (
+    data.system &&
+    (data.system["weapon-main"] || data.system["weapon-off"])
+  ) {
+    Object.values(actor.apps).forEach((app) => {
       if (app.render) {
         try {
           app.render(true);
-        } catch (error) {
-
-        }
+        } catch (error) {}
       }
     });
   }
 });
 
 Hooks.on("updateItem", async (item, data, options, userId) => {
-
   if (item.type !== "weapon") return;
 
   const actor = item.parent;
   if (!actor) return;
 
   const isEquipped = item.system.equipped;
-  const hasDataChanges = data.system && (
-    data.system.damage !== undefined ||
-    data.system.trait !== undefined ||
-    data.system.range !== undefined ||
-    data.system.damageType !== undefined ||
-    data.system.category !== undefined ||
-    data.system.tier !== undefined
-  );
+  const hasDataChanges =
+    data.system &&
+    (data.system.damage !== undefined ||
+      data.system.trait !== undefined ||
+      data.system.range !== undefined ||
+      data.system.damageType !== undefined ||
+      data.system.category !== undefined ||
+      data.system.tier !== undefined);
 
   if (data.system?.equipped !== undefined) {
-
   }
 
   if (hasDataChanges && isEquipped) {
-
   }
 
   if (data.system?.equipped !== undefined || (hasDataChanges && isEquipped)) {
-
-    const actorSheet = Object.values(actor.apps).find(app => app.constructor.name.includes('ActorSheet'));
+    const actorSheet = Object.values(actor.apps).find((app) =>
+      app.constructor.name.includes("ActorSheet")
+    );
 
     if (actorSheet) {
-
       try {
         await EquipmentHandler.syncEquippedWeapons(actor, actorSheet);
         actorSheet.render(true);
-
-      } catch (error) {
-
-      }
+      } catch (error) {}
     }
   }
 });
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {
-
   if (data.type === "Item") {
     createDaggerheartMacro(data, slot);
     return false;
@@ -359,7 +428,6 @@ Hooks.on("hotbarDrop", (bar, data, slot) => {
 });
 
 Hooks.once("ready", async function () {
-
   if (game.user.isGM) {
     await DaggerheartMigrations.migrateWorld();
   }
@@ -374,7 +442,8 @@ Hooks.once("ready", async function () {
   await game.daggerheart.countdownTracker.initialize();
 
   // Initialize tracker notification bubbles
-  game.daggerheart.trackerNotificationBubbles = new TrackerNotificationBubbles();
+  game.daggerheart.trackerNotificationBubbles =
+    new TrackerNotificationBubbles();
   game.daggerheart.trackerNotificationBubbles.initialize();
 
   window.spendFear = async function (amount) {
@@ -437,28 +506,34 @@ Hooks.once("ready", async function () {
     console.log("\n--- Test 1: Standalone Fear Roll ---");
     await game.daggerheart.rollHandler.rollFear({
       sendToChat: true,
-      flavor: "<p class='roll-flavor-line'><b>Test Fear Roll</b> (should trigger +1 Fear globally)</p>"
+      flavor:
+        "<p class='roll-flavor-line'><b>Test Fear Roll</b> (should trigger +1 Fear globally)</p>",
     });
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     console.log("\n--- Test 2: Duality Roll ---");
     await game.daggerheart.rollHandler.rollDuality({
       sendToChat: true,
-      flavor: "<p class='roll-flavor-line'><b>Test Duality Roll</b> (automation depends on result)</p>"
+      flavor:
+        "<p class='roll-flavor-line'><b>Test Duality Roll</b> (automation depends on result)</p>",
     });
 
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     console.log("\n--- Test 3: Duality Dialog (No Actor) ---");
     await game.daggerheart.rollHandler.dualityWithDialog({
       title: "Test Duality (No Actor)",
       skipDialog: true,
-      rollDetails: { modifier: 0, advantage: 0, disadvantage: 0 }
+      rollDetails: { modifier: 0, advantage: 0, disadvantage: 0 },
     });
 
-    console.log("\n=== Test completed! Check the console output above and look for automation messages ===");
-    ui.notifications.info("Global automation test completed. Check console for detailed output.");
+    console.log(
+      "\n=== Test completed! Check the console output above and look for automation messages ==="
+    );
+    ui.notifications.info(
+      "Global automation test completed. Check console for detailed output."
+    );
   };
 
   window.testWeaponEquip = async function () {
@@ -469,7 +544,7 @@ Hooks.once("ready", async function () {
     }
 
     const actor = selectedTokens[0].actor;
-    const weapons = actor.items.filter(i => i.type === "weapon");
+    const weapons = actor.items.filter((i) => i.type === "weapon");
 
     if (weapons.length === 0) {
       ui.notifications.warn("This actor has no weapons");
@@ -478,37 +553,69 @@ Hooks.once("ready", async function () {
 
     console.log("=== Weapon Equip Test (Dual System) ===");
     console.log("Actor:", actor.name);
-    console.log("Weapons:", weapons.map(w => `${w.name} (equipped: ${w.system.equipped}, slot: ${w.system.weaponSlot})`));
-    console.log("Current weapon-main damage:", actor.system["weapon-main"]?.damage);
-    console.log("Current weapon-main to-hit:", actor.system["weapon-main"]?.["to-hit"]);
-    console.log("Current weapon-off damage:", actor.system["weapon-off"]?.damage);
-    console.log("Current weapon-off to-hit:", actor.system["weapon-off"]?.["to-hit"]);
+    console.log(
+      "Weapons:",
+      weapons.map(
+        (w) =>
+          `${w.name} (equipped: ${w.system.equipped}, slot: ${w.system.weaponSlot})`
+      )
+    );
+    console.log(
+      "Current weapon-main damage:",
+      actor.system["weapon-main"]?.damage
+    );
+    console.log(
+      "Current weapon-main to-hit:",
+      actor.system["weapon-main"]?.["to-hit"]
+    );
+    console.log(
+      "Current weapon-off damage:",
+      actor.system["weapon-off"]?.damage
+    );
+    console.log(
+      "Current weapon-off to-hit:",
+      actor.system["weapon-off"]?.["to-hit"]
+    );
 
     const weapon = weapons[0];
     console.log("Testing with weapon:", weapon.name);
     console.log("Weapon system data:", weapon.system);
     console.log("Weapon damage (raw):", weapon.system.damage);
     console.log("Weapon damage type:", typeof weapon.system.damage);
-    console.log("Weapon damage structure:", JSON.stringify(weapon.system.damage, null, 2));
+    console.log(
+      "Weapon damage structure:",
+      JSON.stringify(weapon.system.damage, null, 2)
+    );
     console.log("Weapon trait:", weapon.system.trait);
     console.log("Current weapon slot:", weapon.system.weaponSlot);
 
-    const sheet = Object.values(actor.apps).find(app => app.constructor.name.includes('ActorSheet'));
+    const sheet = Object.values(actor.apps).find((app) =>
+      app.constructor.name.includes("ActorSheet")
+    );
     if (!sheet) {
       ui.notifications.warn("Please open the character sheet first");
       return;
     }
 
     console.log("=== Testing Primary Weapon Equip ===");
-    const successPrimary = await EquipmentHandler.equipPrimaryWeapon(actor, weapon);
+    const successPrimary = await EquipmentHandler.equipPrimaryWeapon(
+      actor,
+      weapon
+    );
     if (successPrimary) {
       console.log("Primary weapon equip successful");
       await EquipmentHandler.syncEquippedWeapons(actor, sheet);
       console.log("Primary weapon sync completed");
       sheet.render(true, { immediate: true });
 
-      console.log("New weapon-main damage:", actor.system["weapon-main"]?.damage);
-      console.log("New weapon-main to-hit:", actor.system["weapon-main"]?.["to-hit"]);
+      console.log(
+        "New weapon-main damage:",
+        actor.system["weapon-main"]?.damage
+      );
+      console.log(
+        "New weapon-main to-hit:",
+        actor.system["weapon-main"]?.["to-hit"]
+      );
       console.log("Updated weapon slot:", weapon.system.weaponSlot);
       console.log("Primary weapon test completed - check the sheet!");
     } else {
@@ -524,10 +631,12 @@ Hooks.once("ready", async function () {
     }
 
     const actor = selectedTokens[0].actor;
-    const weapons = actor.items.filter(i => i.type === "weapon");
+    const weapons = actor.items.filter((i) => i.type === "weapon");
 
     if (weapons.length < 2) {
-      ui.notifications.warn("This actor needs at least 2 weapons to test secondary");
+      ui.notifications.warn(
+        "This actor needs at least 2 weapons to test secondary"
+      );
       return;
     }
 
@@ -535,13 +644,18 @@ Hooks.once("ready", async function () {
     console.log("=== Testing Secondary Weapon Equip ===");
     console.log("Testing with weapon:", weapon.name);
 
-    const sheet = Object.values(actor.apps).find(app => app.constructor.name.includes('ActorSheet'));
+    const sheet = Object.values(actor.apps).find((app) =>
+      app.constructor.name.includes("ActorSheet")
+    );
     if (!sheet) {
       ui.notifications.warn("Please open the character sheet first");
       return;
     }
 
-    const successSecondary = await EquipmentHandler.equipSecondaryWeapon(actor, weapon);
+    const successSecondary = await EquipmentHandler.equipSecondaryWeapon(
+      actor,
+      weapon
+    );
     if (successSecondary) {
       console.log("Secondary weapon equip successful");
       await EquipmentHandler.syncEquippedWeapons(actor, sheet);
@@ -549,7 +663,10 @@ Hooks.once("ready", async function () {
       sheet.render(true, { immediate: true });
 
       console.log("New weapon-off damage:", actor.system["weapon-off"]?.damage);
-      console.log("New weapon-off to-hit:", actor.system["weapon-off"]?.["to-hit"]);
+      console.log(
+        "New weapon-off to-hit:",
+        actor.system["weapon-off"]?.["to-hit"]
+      );
       console.log("Updated weapon slot:", weapon.system.weaponSlot);
       console.log("Secondary weapon test completed - check the sheet!");
     } else {
@@ -567,11 +684,26 @@ Hooks.once("ready", async function () {
     const actor = selectedTokens[0].actor;
     console.log("=== Weapon Data Debug ===");
     console.log("Actor:", actor.name);
-    console.log("weapon-main damage:", JSON.stringify(actor.system["weapon-main"]?.damage, null, 2));
-    console.log("weapon-main to-hit:", JSON.stringify(actor.system["weapon-main"]?.["to-hit"], null, 2));
-    console.log("weapon-off damage:", JSON.stringify(actor.system["weapon-off"]?.damage, null, 2));
-    console.log("weapon-off to-hit:", JSON.stringify(actor.system["weapon-off"]?.["to-hit"], null, 2));
-    console.log("Base value restrictions:", JSON.stringify(actor.flags?.daggerheart?.baseValueRestrictions, null, 2));
+    console.log(
+      "weapon-main damage:",
+      JSON.stringify(actor.system["weapon-main"]?.damage, null, 2)
+    );
+    console.log(
+      "weapon-main to-hit:",
+      JSON.stringify(actor.system["weapon-main"]?.["to-hit"], null, 2)
+    );
+    console.log(
+      "weapon-off damage:",
+      JSON.stringify(actor.system["weapon-off"]?.damage, null, 2)
+    );
+    console.log(
+      "weapon-off to-hit:",
+      JSON.stringify(actor.system["weapon-off"]?.["to-hit"], null, 2)
+    );
+    console.log(
+      "Base value restrictions:",
+      JSON.stringify(actor.flags?.daggerheart?.baseValueRestrictions, null, 2)
+    );
   };
 
   window.testWeaponSystem = function () {
@@ -584,9 +716,18 @@ Hooks.once("ready", async function () {
     const actor = selectedTokens[0].actor;
     console.log("=== New Weapon System Test ===");
     console.log("Actor:", actor.name);
-    console.log("Primary weapon data:", EquipmentHandler.getDynamicWeaponData(actor, "primary"));
-    console.log("Secondary weapon data:", EquipmentHandler.getDynamicWeaponData(actor, "secondary"));
-    console.log("Weapon display data:", EquipmentHandler.getWeaponDisplayData(actor));
+    console.log(
+      "Primary weapon data:",
+      EquipmentHandler.getDynamicWeaponData(actor, "primary")
+    );
+    console.log(
+      "Secondary weapon data:",
+      EquipmentHandler.getDynamicWeaponData(actor, "secondary")
+    );
+    console.log(
+      "Weapon display data:",
+      EquipmentHandler.getWeaponDisplayData(actor)
+    );
   };
 
   window.testWeaponScenario = function () {
@@ -600,32 +741,48 @@ Hooks.once("ready", async function () {
     console.log("=== Weapon System Test Scenario ===");
     console.log("Actor:", actor.name);
 
-    const strength = foundry.utils.getProperty(actor, 'system.strength.value') ?? 0;
+    const strength =
+      foundry.utils.getProperty(actor, "system.strength.value") ?? 0;
     console.log(`Character strength modifier: ${strength}`);
 
     const primaryWeapon = EquipmentHandler.getPrimaryWeapon(actor);
     if (primaryWeapon) {
       console.log(`\nPrimary weapon: ${primaryWeapon.name}`);
 
-      const weaponTotalDamage = EquipmentHandler.getWeaponTotalDamage(primaryWeapon, actor);
+      const weaponTotalDamage = EquipmentHandler.getWeaponTotalDamage(
+        primaryWeapon,
+        actor
+      );
       console.log(`Weapon total damage: ${weaponTotalDamage}`);
 
-      const weaponTraitValue = EquipmentHandler.getWeaponTraitValue(primaryWeapon, actor);
+      const weaponTraitValue = EquipmentHandler.getWeaponTraitValue(
+        primaryWeapon,
+        actor
+      );
       console.log(`Weapon trait value: ${weaponTraitValue}`);
 
-      const weaponData = EquipmentHandler.getDynamicWeaponData(actor, "primary");
+      const weaponData = EquipmentHandler.getDynamicWeaponData(
+        actor,
+        "primary"
+      );
       console.log("\nFinal character sheet data:");
       console.log(`- Attack modifier base: ${weaponData["to-hit"].baseValue}`);
       console.log(`- Attack modifier total: ${weaponData["to-hit"].value}`);
       console.log(`- Damage base: ${weaponData.damage.baseValue}`);
       console.log(`- Damage total: ${weaponData.damage.value}`);
-      console.log(`- Character modifiers preserved:`, weaponData["to-hit"].modifiers);
+      console.log(
+        `- Character modifiers preserved:`,
+        weaponData["to-hit"].modifiers
+      );
 
       console.log("\n✅ This demonstrates the correct separation:");
-      console.log("- Weapon damage (1d12 + 1d6 + 2) becomes character's base value");
-      console.log("- Character modifiers (+2 blessing) stay as character modifiers");
+      console.log(
+        "- Weapon damage (1d12 + 1d6 + 2) becomes character's base value"
+      );
+      console.log(
+        "- Character modifiers (+2 blessing) stay as character modifiers"
+      );
       console.log("- Final result: (1d12 + 1d6 + 2) + 2");
-
     } else {
       console.log("No primary weapon equipped");
     }
@@ -633,7 +790,10 @@ Hooks.once("ready", async function () {
     const secondaryWeapon = EquipmentHandler.getSecondaryWeapon(actor);
     if (secondaryWeapon) {
       console.log(`\nSecondary weapon: ${secondaryWeapon.name}`);
-      const secondaryData = EquipmentHandler.getDynamicWeaponData(actor, "secondary");
+      const secondaryData = EquipmentHandler.getDynamicWeaponData(
+        actor,
+        "secondary"
+      );
       console.log("Secondary weapon data:", secondaryData);
     }
   };
@@ -649,15 +809,15 @@ Hooks.once("ready", async function () {
     console.log("=== Weapon Damage Debug ===");
     console.log("Actor:", actor.name);
 
-    const weapons = actor.items.filter(i => i.type === "weapon");
+    const weapons = actor.items.filter((i) => i.type === "weapon");
     console.log("\n--- All Weapons ---");
-    weapons.forEach(weapon => {
+    weapons.forEach((weapon) => {
       console.log(`${weapon.name}:`);
       console.log("  Raw damage data:", weapon.system.damage);
       console.log("  Equipped:", weapon.system.equipped);
       console.log("  Slot:", weapon.system.weaponSlot);
 
-      if (typeof weapon.system.damage === 'object') {
+      if (typeof weapon.system.damage === "object") {
         console.log("  - baseValue:", weapon.system.damage.baseValue);
         console.log("  - value:", weapon.system.damage.value);
         console.log("  - modifiers:", weapon.system.damage.modifiers);
@@ -665,8 +825,14 @@ Hooks.once("ready", async function () {
     });
 
     console.log("\n--- Character Weapon Slots ---");
-    console.log("Primary weapon slot:", JSON.stringify(actor.system["weapon-main"], null, 2));
-    console.log("Secondary weapon slot:", JSON.stringify(actor.system["weapon-off"], null, 2));
+    console.log(
+      "Primary weapon slot:",
+      JSON.stringify(actor.system["weapon-main"], null, 2)
+    );
+    console.log(
+      "Secondary weapon slot:",
+      JSON.stringify(actor.system["weapon-off"], null, 2)
+    );
 
     console.log("\n--- Dynamic Resolution Test ---");
     const primaryWeapon = EquipmentHandler.getPrimaryWeapon(actor);
@@ -674,13 +840,19 @@ Hooks.once("ready", async function () {
 
     if (primaryWeapon) {
       console.log("Primary weapon resolved data:");
-      const resolvedPrimary = EquipmentHandler.getResolvedWeaponData(actor, "primary");
+      const resolvedPrimary = EquipmentHandler.getResolvedWeaponData(
+        actor,
+        "primary"
+      );
       console.log(JSON.stringify(resolvedPrimary, null, 2));
     }
 
     if (secondaryWeapon) {
       console.log("Secondary weapon resolved data:");
-      const resolvedSecondary = EquipmentHandler.getResolvedWeaponData(actor, "secondary");
+      const resolvedSecondary = EquipmentHandler.getResolvedWeaponData(
+        actor,
+        "secondary"
+      );
       console.log(JSON.stringify(resolvedSecondary, null, 2));
     }
   };
@@ -692,20 +864,33 @@ Hooks.once("ready", async function () {
     rollDamage,
     rollHealing,
     undoDamageHealing,
-    debugUndoData
+    debugUndoData,
   };
-  game.daggerheart.damageApplication.rollConsolidatedDamage = _rollConsolidatedDamage;
+  game.daggerheart.damageApplication.rollConsolidatedDamage =
+    _rollConsolidatedDamage;
 
   game.daggerheart.spendFear = window.spendFear;
   game.daggerheart.gainFear = window.gainFear;
 
-  window.applyDamage = async function (targetActor, damageAmount, sourceActor, createUndo = true, armorSlotsUsed = 0) {
+  window.applyDamage = async function (
+    targetActor,
+    damageAmount,
+    sourceActor,
+    createUndo = true,
+    armorSlotsUsed = 0
+  ) {
     if (!game.daggerheart?.damageApplication?.applyDamage) {
       console.error("Damage application not initialized");
       ui.notifications.error("Damage application not available");
       return false;
     }
-    return await game.daggerheart.damageApplication.applyDamage(targetActor, damageAmount, sourceActor, createUndo, armorSlotsUsed);
+    return await game.daggerheart.damageApplication.applyDamage(
+      targetActor,
+      damageAmount,
+      sourceActor,
+      createUndo,
+      armorSlotsUsed
+    );
   };
 
   window.applyHealing = async function (targetActor, healAmount, sourceActor) {
@@ -714,16 +899,30 @@ Hooks.once("ready", async function () {
       ui.notifications.error("Healing application not available");
       return false;
     }
-    return await game.daggerheart.damageApplication.applyHealing(targetActor, healAmount, sourceActor);
+    return await game.daggerheart.damageApplication.applyHealing(
+      targetActor,
+      healAmount,
+      sourceActor
+    );
   };
 
-  window.applyDirectDamage = async function (targetActor, hpDamage, sourceActor, createUndo = true) {
+  window.applyDirectDamage = async function (
+    targetActor,
+    hpDamage,
+    sourceActor,
+    createUndo = true
+  ) {
     if (!game.daggerheart?.damageApplication?.applyDirectDamage) {
       console.error("Direct damage application not initialized");
       ui.notifications.error("Direct damage application not available");
       return false;
     }
-    return await game.daggerheart.damageApplication.applyDirectDamage(targetActor, hpDamage, sourceActor, createUndo);
+    return await game.daggerheart.damageApplication.applyDirectDamage(
+      targetActor,
+      hpDamage,
+      sourceActor,
+      createUndo
+    );
   };
 
   window.rollDamage = async function (formula, options) {
@@ -732,7 +931,10 @@ Hooks.once("ready", async function () {
       ui.notifications.error("Damage rolling not available");
       return null;
     }
-    return await game.daggerheart.damageApplication.rollDamage(formula, options);
+    return await game.daggerheart.damageApplication.rollDamage(
+      formula,
+      options
+    );
   };
 
   window.rollHealing = async function (formula, options) {
@@ -741,7 +943,10 @@ Hooks.once("ready", async function () {
       ui.notifications.error("Healing rolling not available");
       return null;
     }
-    return await game.daggerheart.damageApplication.rollHealing(formula, options);
+    return await game.daggerheart.damageApplication.rollHealing(
+      formula,
+      options
+    );
   };
 
   window.undoDamageHealing = async function (undoId) {
@@ -769,28 +974,50 @@ Hooks.once("ready", async function () {
   game.daggerheart.undoDamageHealing = window.undoDamageHealing;
   game.daggerheart.debugUndoData = window.debugUndoData;
 
-  window.addModifier = function (actorName, fieldPath, modifierName, modifierValue, options = {}) {
-    console.warn("Global addModifier() using actor names is DEPRECATED. Use addModifierById() or addModifierByRef() instead. Actor names are not unique and may cause issues.");
+  window.addModifier = function (
+    actorName,
+    fieldPath,
+    modifierName,
+    modifierValue,
+    options = {}
+  ) {
+    console.warn(
+      "Global addModifier() using actor names is DEPRECATED. Use addModifierById() or addModifierByRef() instead. Actor names are not unique and may cause issues."
+    );
     if (!game.daggerheart?.ModifierManager) {
       console.error("ModifierManager not initialized");
       ui.notifications.error("ModifierManager not available");
       return false;
     }
-    return game.daggerheart.ModifierManager.addModifierByName(actorName, fieldPath, modifierName, modifierValue, options);
+    return game.daggerheart.ModifierManager.addModifierByName(
+      actorName,
+      fieldPath,
+      modifierName,
+      modifierValue,
+      options
+    );
   };
 
   window.removeModifier = function (actorName, fieldPath, modifierName) {
-    console.warn("Global removeModifier() using actor names is DEPRECATED. Use removeModifierById() or removeModifierByRef() instead. Actor names are not unique and may cause issues.");
+    console.warn(
+      "Global removeModifier() using actor names is DEPRECATED. Use removeModifierById() or removeModifierByRef() instead. Actor names are not unique and may cause issues."
+    );
     if (!game.daggerheart?.ModifierManager) {
       console.error("ModifierManager not initialized");
       ui.notifications.error("ModifierManager not available");
       return false;
     }
-    return game.daggerheart.ModifierManager.removeModifierByName(actorName, fieldPath, modifierName);
+    return game.daggerheart.ModifierManager.removeModifierByName(
+      actorName,
+      fieldPath,
+      modifierName
+    );
   };
 
   window.listModifiers = function (actorName) {
-    console.warn("Global listModifiers() using actor names is DEPRECATED. Use listModifiersById() or listModifiersByRef() instead. Actor names are not unique and may cause issues.");
+    console.warn(
+      "Global listModifiers() using actor names is DEPRECATED. Use listModifiersById() or listModifiersByRef() instead. Actor names are not unique and may cause issues."
+    );
     if (!game.daggerheart?.ModifierManager) {
       console.error("ModifierManager not initialized");
       ui.notifications.error("ModifierManager not available");
@@ -799,13 +1026,25 @@ Hooks.once("ready", async function () {
     return game.daggerheart.ModifierManager.listAllModifiersByName(actorName);
   };
 
-  window.addModifierById = function (actorId, fieldPath, modifierName, modifierValue, options = {}) {
+  window.addModifierById = function (
+    actorId,
+    fieldPath,
+    modifierName,
+    modifierValue,
+    options = {}
+  ) {
     if (!game.daggerheart?.ModifierManager) {
       console.error("ModifierManager not initialized");
       ui.notifications.error("ModifierManager not available");
       return false;
     }
-    return game.daggerheart.ModifierManager.addModifierById(actorId, fieldPath, modifierName, modifierValue, options);
+    return game.daggerheart.ModifierManager.addModifierById(
+      actorId,
+      fieldPath,
+      modifierName,
+      modifierValue,
+      options
+    );
   };
 
   window.removeModifierById = function (actorId, fieldPath, modifierName) {
@@ -814,7 +1053,11 @@ Hooks.once("ready", async function () {
       ui.notifications.error("ModifierManager not available");
       return false;
     }
-    return game.daggerheart.ModifierManager.removeModifierById(actorId, fieldPath, modifierName);
+    return game.daggerheart.ModifierManager.removeModifierById(
+      actorId,
+      fieldPath,
+      modifierName
+    );
   };
 
   window.listModifiersById = function (actorId) {
@@ -826,13 +1069,25 @@ Hooks.once("ready", async function () {
     return game.daggerheart.ModifierManager.getModifiersById(actorId);
   };
 
-  window.addModifierByRef = function (actorRef, fieldPath, modifierName, modifierValue, options = {}) {
+  window.addModifierByRef = function (
+    actorRef,
+    fieldPath,
+    modifierName,
+    modifierValue,
+    options = {}
+  ) {
     if (!game.daggerheart?.ModifierManager) {
       console.error("ModifierManager not initialized");
       ui.notifications.error("ModifierManager not available");
       return false;
     }
-    return game.daggerheart.ModifierManager.addModifierByRef(actorRef, fieldPath, modifierName, modifierValue, options);
+    return game.daggerheart.ModifierManager.addModifierByRef(
+      actorRef,
+      fieldPath,
+      modifierName,
+      modifierValue,
+      options
+    );
   };
 
   window.removeModifierByRef = function (actorRef, fieldPath, modifierName) {
@@ -841,7 +1096,11 @@ Hooks.once("ready", async function () {
       ui.notifications.error("ModifierManager not available");
       return false;
     }
-    return game.daggerheart.ModifierManager.removeModifierByRef(actorRef, fieldPath, modifierName);
+    return game.daggerheart.ModifierManager.removeModifierByRef(
+      actorRef,
+      fieldPath,
+      modifierName
+    );
   };
 
   window.listModifiersByRef = function (actorRef) {
@@ -891,15 +1150,29 @@ Hooks.once("ready", async function () {
     console.log("\n--- Testing Add Modifiers ---");
 
     console.log("Adding +2 blessing to strength...");
-    const result1 = addModifier(actor.name, "strength", "Blessing", 2, { color: "#00ff00" });
+    const result1 = addModifier(actor.name, "strength", "Blessing", 2, {
+      color: "#00ff00",
+    });
     console.log("Result:", result1 ? "Success" : "Failed");
 
     console.log("Adding +1 enhancement to weapon-main.to-hit...");
-    const result2 = addModifier(actor.name, "weapon-main.to-hit", "Enhancement", 1, { color: "#0080ff" });
+    const result2 = addModifier(
+      actor.name,
+      "weapon-main.to-hit",
+      "Enhancement",
+      1,
+      { color: "#0080ff" }
+    );
     console.log("Result:", result2 ? "Success" : "Failed");
 
     console.log("Adding +1d4 fire to weapon-main.damage...");
-    const result3 = addModifier(actor.name, "weapon-main.damage", "Fire Damage", "1d4", { color: "#ff4000" });
+    const result3 = addModifier(
+      actor.name,
+      "weapon-main.damage",
+      "Fire Damage",
+      "1d4",
+      { color: "#ff4000" }
+    );
     console.log("Result:", result3 ? "Success" : "Failed");
 
     console.log("\n--- Current Modifiers ---");
@@ -913,10 +1186,17 @@ Hooks.once("ready", async function () {
 
     console.log("\n--- Modifiers After Removal ---");
     const modifiersAfter = listModifiers(actor.name);
-    console.log("Remaining modifiers:", JSON.stringify(modifiersAfter, null, 2));
+    console.log(
+      "Remaining modifiers:",
+      JSON.stringify(modifiersAfter, null, 2)
+    );
 
-    console.log("\n=== Test completed! Check the character sheet to see changes ===");
-    ui.notifications.info("ModifierManager test completed. Check console for detailed output.");
+    console.log(
+      "\n=== Test completed! Check the character sheet to see changes ==="
+    );
+    ui.notifications.info(
+      "ModifierManager test completed. Check console for detailed output."
+    );
   };
 
   window.analyzeArmorDuplicates = function () {
@@ -930,7 +1210,9 @@ Hooks.once("ready", async function () {
     const analysis = ArmorCleanup.analyzeActor(actor);
     console.log("=== Armor Duplicate Analysis ===");
     console.log(JSON.stringify(analysis, null, 2));
-    ui.notifications.info(`Found ${analysis.totalDuplicates} duplicate armor modifiers on ${actor.name}`);
+    ui.notifications.info(
+      `Found ${analysis.totalDuplicates} duplicate armor modifiers on ${actor.name}`
+    );
   };
 
   window.cleanupArmorDuplicates = async function () {
@@ -946,9 +1228,11 @@ Hooks.once("ready", async function () {
     console.log(JSON.stringify(result, null, 2));
 
     if (result.success) {
-      ui.notifications.info(`Cleaned up ${result.modifiersRemoved} duplicate modifiers from ${actor.name}`);
+      ui.notifications.info(
+        `Cleaned up ${result.modifiersRemoved} duplicate modifiers from ${actor.name}`
+      );
     } else {
-      ui.notifications.error(`Cleanup failed: ${result.errors.join(', ')}`);
+      ui.notifications.error(`Cleanup failed: ${result.errors.join(", ")}`);
     }
   };
 
@@ -963,18 +1247,28 @@ Hooks.once("ready", async function () {
     console.log(JSON.stringify(result, null, 2));
 
     if (result.success) {
-      ui.notifications.info(`Processed ${result.processedActors} actors, removed ${result.totalModifiersRemoved} duplicate modifiers`);
+      ui.notifications.info(
+        `Processed ${result.processedActors} actors, removed ${result.totalModifiersRemoved} duplicate modifiers`
+      );
     } else {
-      ui.notifications.error(`Global cleanup had errors: ${result.errors.join(', ')}`);
+      ui.notifications.error(
+        `Global cleanup had errors: ${result.errors.join(", ")}`
+      );
     }
   };
 
   game.daggerheart.testModifierSystem = window.testModifierSystem;
 
   console.log("Counter UI initialized and displayed above the hotbar.");
-  console.log("spendFear(), gainFear(), spendStress(), clearStress(), spendHope(), gainHope(), applyDamage(), applyHealing(), rollDamage(), rollHealing(), undoDamageHealing(), debugUndoData(), cleanupDuplicateMacros(), testWeaponEquip(), testModifierSystem(), and testFearAutomation() functions are now available globally.");
-  console.log("🎯 Modifier System: addModifier(), removeModifier(), and listModifiers() functions are now available globally.");
-  console.log("� Global Hope/Fear automation is now active for ALL duality rolls!");
+  console.log(
+    "spendFear(), gainFear(), spendStress(), clearStress(), spendHope(), gainHope(), applyDamage(), applyHealing(), rollDamage(), rollHealing(), undoDamageHealing(), debugUndoData(), cleanupDuplicateMacros(), testWeaponEquip(), testModifierSystem(), and testFearAutomation() functions are now available globally."
+  );
+  console.log(
+    "🎯 Modifier System: addModifier(), removeModifier(), and listModifiers() functions are now available globally."
+  );
+  console.log(
+    "� Global Hope/Fear automation is now active for ALL duality rolls!"
+  );
 
   game.daggerheart.testFearAutomation = window.testFearAutomation;
 
@@ -983,15 +1277,15 @@ Hooks.once("ready", async function () {
   }
 
   game.socket.on("system.daggerheart", async (data) => {
-
     if (!game.user.isGM) return;
 
     if (data.type === "requestFearGain") {
-      console.log(`Daggerheart | Processing fear gain request from ${data.userName}: +${data.amount} from ${data.source}`);
+      console.log(
+        `Daggerheart | Processing fear gain request from ${data.userName}: +${data.amount} from ${data.source}`
+      );
 
       if (game.daggerheart?.counter) {
         try {
-
           await game.daggerheart.counter.gainFear(data.amount);
 
           game.socket.emit("system.daggerheart", {
@@ -999,10 +1293,13 @@ Hooks.once("ready", async function () {
             amount: data.amount,
             source: data.source,
             success: true,
-            targetUserId: data.userId
+            targetUserId: data.userId,
           });
         } catch (error) {
-          console.error("Daggerheart | Error processing fear gain request:", error);
+          console.error(
+            "Daggerheart | Error processing fear gain request:",
+            error
+          );
 
           game.socket.emit("system.daggerheart", {
             type: "fearGainConfirmation",
@@ -1010,15 +1307,20 @@ Hooks.once("ready", async function () {
             source: data.source,
             success: false,
             error: error.message,
-            targetUserId: data.userId
+            targetUserId: data.userId,
           });
         }
       }
     }
 
-    if (data.type === "fearGainConfirmation" && data.targetUserId === game.user.id) {
+    if (
+      data.type === "fearGainConfirmation" &&
+      data.targetUserId === game.user.id
+    ) {
       if (data.success) {
-        console.log(`Daggerheart | Fear gain confirmed: +${data.amount} from ${data.source}`);
+        console.log(
+          `Daggerheart | Fear gain confirmed: +${data.amount} from ${data.source}`
+        );
       } else {
         console.warn(`Daggerheart | Fear gain failed: ${data.error}`);
       }
@@ -1029,7 +1331,6 @@ Hooks.once("ready", async function () {
 });
 
 async function _cleanupDuplicateMacros() {
-
   const macroConfigs = [
     { name: "Apply Damage", flag: "daggerheart.damageApplicationMacro" },
     { name: "Apply Healing", flag: "daggerheart.healingApplicationMacro" },
@@ -1044,28 +1345,38 @@ async function _cleanupDuplicateMacros() {
     { name: "Spend Hope", flag: "daggerheart.spendHopeMacro" },
     { name: "Spend 1 Hope", flag: "daggerheart.spendHopeMacro" },
     { name: "Gain Hope", flag: "daggerheart.gainHopeMacro" },
-    { name: "Gain 1 Hope", flag: "daggerheart.gainHopeMacro" }
+    { name: "Gain 1 Hope", flag: "daggerheart.gainHopeMacro" },
   ];
 
   let totalCleaned = 0;
 
   for (const config of macroConfigs) {
-    const duplicates = game.macros.filter(m => m.name === config.name);
+    const duplicates = game.macros.filter((m) => m.name === config.name);
 
     if (duplicates.length > 1) {
-      console.log(`Found ${duplicates.length} duplicate macros named "${config.name}", cleaning up...`);
+      console.log(
+        `Found ${duplicates.length} duplicate macros named "${config.name}", cleaning up...`
+      );
 
-      let macroToKeep = duplicates.find(m => m.flags?.[config.flag.split('.')[0]]?.[config.flag.split('.')[1]]) || duplicates[0];
+      let macroToKeep =
+        duplicates.find(
+          (m) =>
+            m.flags?.[config.flag.split(".")[0]]?.[config.flag.split(".")[1]]
+        ) || duplicates[0];
 
-      const macrosToDelete = duplicates.filter(m => m.id !== macroToKeep.id);
+      const macrosToDelete = duplicates.filter((m) => m.id !== macroToKeep.id);
       for (const macro of macrosToDelete) {
         await macro.delete();
         console.log(`Deleted duplicate macro: ${config.name} (${macro.id})`);
         totalCleaned++;
       }
 
-      if (!macroToKeep.flags?.[config.flag.split('.')[0]]?.[config.flag.split('.')[1]]) {
-        const flagParts = config.flag.split('.');
+      if (
+        !macroToKeep.flags?.[config.flag.split(".")[0]]?.[
+          config.flag.split(".")[1]
+        ]
+      ) {
+        const flagParts = config.flag.split(".");
         await macroToKeep.setFlag(flagParts[0], flagParts[1], true);
       }
     }
@@ -1087,22 +1398,35 @@ Hooks.on("getSceneControlButtons", (controls) => {
 
   const canManage = game.user.isGM || game.user.hasRole("ASSISTANT");
   if (!canManage) {
-    console.log("🎯 DAGGERHEART: User doesn't have permission to manage countdown trackers");
+    console.log(
+      "🎯 DAGGERHEART: User doesn't have permission to manage countdown trackers"
+    );
     return;
   }
 
   if (controls.tokens) {
     console.log("🎯 DAGGERHEART: Found tokens controls:", controls.tokens);
-    console.log("🎯 DAGGERHEART: Tokens controls tools:", controls.tokens.tools);
-    console.log("🎯 DAGGERHEART: Tokens controls tools type:", typeof controls.tokens.tools);
-    console.log("🎯 DAGGERHEART: Tokens controls tools is array:", Array.isArray(controls.tokens.tools));
+    console.log(
+      "🎯 DAGGERHEART: Tokens controls tools:",
+      controls.tokens.tools
+    );
+    console.log(
+      "🎯 DAGGERHEART: Tokens controls tools type:",
+      typeof controls.tokens.tools
+    );
+    console.log(
+      "🎯 DAGGERHEART: Tokens controls tools is array:",
+      Array.isArray(controls.tokens.tools)
+    );
 
     if (!controls.tokens.tools) {
       controls.tokens.tools = {};
       console.log("🎯 DAGGERHEART: Created tools object for tokens controls");
     }
 
-    console.log("🎯 DAGGERHEART: Adding countdown tracker button to tokens controls");
+    console.log(
+      "🎯 DAGGERHEART: Adding countdown tracker button to tokens controls"
+    );
     controls.tokens.tools["countdown-tracker-manage"] = {
       name: "countdown-tracker-manage",
       title: "Manage Countdown Trackers",
@@ -1115,66 +1439,83 @@ Hooks.on("getSceneControlButtons", (controls) => {
         } else {
           ui.notifications.error("Countdown tracker not initialized");
         }
-      }
+      },
     };
 
     console.log("🎯 DAGGERHEART: Button added successfully to tokens controls");
   } else {
     console.log("🎯 DAGGERHEART: Tokens controls not found");
-    console.log("🎯 DAGGERHEART: Available control groups:", Object.keys(controls));
+    console.log(
+      "🎯 DAGGERHEART: Available control groups:",
+      Object.keys(controls)
+    );
 
     const firstControlKey = Object.keys(controls)[0];
     if (firstControlKey && controls[firstControlKey]) {
-      console.log(`🎯 DAGGERHEART: Trying to add to first available control group: ${firstControlKey}`);
-      console.log(`🎯 DAGGERHEART: Control structure:`, controls[firstControlKey]);
+      console.log(
+        `🎯 DAGGERHEART: Trying to add to first available control group: ${firstControlKey}`
+      );
+      console.log(
+        `🎯 DAGGERHEART: Control structure:`,
+        controls[firstControlKey]
+      );
 
       if (!controls[firstControlKey].tools) {
-        console.log(`🎯 DAGGERHEART: Creating tools object for ${firstControlKey}`);
+        console.log(
+          `🎯 DAGGERHEART: Creating tools object for ${firstControlKey}`
+        );
         controls[firstControlKey].tools = {};
       }
 
-      console.log(`🎯 DAGGERHEART: Adding button to ${firstControlKey} controls`);
+      console.log(
+        `🎯 DAGGERHEART: Adding button to ${firstControlKey} controls`
+      );
       controls[firstControlKey].tools["countdown-tracker-manage"] = {
         name: "countdown-tracker-manage",
         title: "Manage Countdown Trackers",
         icon: "fas fa-stopwatch",
         button: true,
         onClick: async () => {
-          console.log("🎯 DAGGERHEART: Countdown tracker button clicked (fallback)!");
+          console.log(
+            "🎯 DAGGERHEART: Countdown tracker button clicked (fallback)!"
+          );
           if (game.daggerheart?.countdownTracker) {
             await game.daggerheart.countdownTracker.showManagementDialog();
           } else {
             ui.notifications.error("Countdown tracker not initialized");
           }
-        }
+        },
       };
 
-      console.log(`🎯 DAGGERHEART: Button added to fallback control group: ${firstControlKey}`);
+      console.log(
+        `🎯 DAGGERHEART: Button added to fallback control group: ${firstControlKey}`
+      );
     }
   }
 });
 
 Hooks.on("preCreateActor", function (document, data, options, userId) {
-
   const prototypeToken = {
-    actorLink: true
+    actorLink: true,
   };
 
   document.updateSource({
-    "prototypeToken": foundry.utils.mergeObject(document.prototypeToken?.toObject() || {}, prototypeToken)
+    prototypeToken: foundry.utils.mergeObject(
+      document.prototypeToken?.toObject() || {},
+      prototypeToken
+    ),
   });
 });
 
 Hooks.on("renderChatLog", (app, html, data) => {
-
   const chatControls = $(document).find(".chat-controls");
 
-  const horizontalRollPrivacy = chatControls.find("#roll-privacy.split-button:not(.vertical)");
+  const horizontalRollPrivacy = chatControls.find(
+    "#roll-privacy.split-button:not(.vertical)"
+  );
 
   if (horizontalRollPrivacy.length) {
-
     if (!horizontalRollPrivacy.find('[data-action="roll-duality"]').length) {
-
       const horizontalDualityButton = $(`
         <button type="button" class="ui-control icon fa-solid fa-dice" 
                 data-action="roll-duality" 
@@ -1189,7 +1530,7 @@ Hooks.on("renderChatLog", (app, html, data) => {
         event.preventDefault();
 
         await game.daggerheart.rollHandler.dualityWithDialog({
-          title: "Duality Dice Roll"
+          title: "Duality Dice Roll",
         });
       });
 
@@ -1197,12 +1538,12 @@ Hooks.on("renderChatLog", (app, html, data) => {
     }
   }
 
-  const verticalRollPrivacy = $(document).find("#roll-privacy.split-button.vertical");
+  const verticalRollPrivacy = $(document).find(
+    "#roll-privacy.split-button.vertical"
+  );
 
   if (verticalRollPrivacy.length) {
-
     if (!verticalRollPrivacy.find('[data-action="roll-duality"]').length) {
-
       const verticalDualityButton = $(`
         <button type="button" class="ui-control icon fa-solid fa-dice" 
                 data-action="roll-duality" 
@@ -1217,7 +1558,7 @@ Hooks.on("renderChatLog", (app, html, data) => {
         event.preventDefault();
 
         await game.daggerheart.rollHandler.dualityWithDialog({
-          title: "Duality Dice Roll"
+          title: "Duality Dice Roll",
         });
       });
 
@@ -1228,10 +1569,18 @@ Hooks.on("renderChatLog", (app, html, data) => {
   if (!horizontalRollPrivacy.length && !verticalRollPrivacy.length) {
     setTimeout(() => {
       const delayedChatControls = $(document).find(".chat-controls");
-      const delayedHorizontalRollPrivacy = delayedChatControls.find("#roll-privacy.split-button:not(.vertical)");
-      const delayedVerticalRollPrivacy = $(document).find("#roll-privacy.split-button.vertical");
+      const delayedHorizontalRollPrivacy = delayedChatControls.find(
+        "#roll-privacy.split-button:not(.vertical)"
+      );
+      const delayedVerticalRollPrivacy = $(document).find(
+        "#roll-privacy.split-button.vertical"
+      );
 
-      if (delayedHorizontalRollPrivacy.length && !delayedHorizontalRollPrivacy.find('[data-action="roll-duality"]').length) {
+      if (
+        delayedHorizontalRollPrivacy.length &&
+        !delayedHorizontalRollPrivacy.find('[data-action="roll-duality"]')
+          .length
+      ) {
         const horizontalDualityButton = $(`
           <button type="button" class="ui-control icon fa-solid fa-dice" 
                   data-action="roll-duality" 
@@ -1245,14 +1594,17 @@ Hooks.on("renderChatLog", (app, html, data) => {
         horizontalDualityButton.on("click", async (event) => {
           event.preventDefault();
           await game.daggerheart.rollHandler.dualityWithDialog({
-            title: "Duality Dice Roll"
+            title: "Duality Dice Roll",
           });
         });
 
         delayedHorizontalRollPrivacy.append(horizontalDualityButton);
       }
 
-      if (delayedVerticalRollPrivacy.length && !delayedVerticalRollPrivacy.find('[data-action="roll-duality"]').length) {
+      if (
+        delayedVerticalRollPrivacy.length &&
+        !delayedVerticalRollPrivacy.find('[data-action="roll-duality"]').length
+      ) {
         const verticalDualityButton = $(`
           <button type="button" class="ui-control icon fa-solid fa-dice" 
                   data-action="roll-duality" 
@@ -1266,7 +1618,7 @@ Hooks.on("renderChatLog", (app, html, data) => {
         verticalDualityButton.on("click", async (event) => {
           event.preventDefault();
           await game.daggerheart.rollHandler.dualityWithDialog({
-            title: "Duality Dice Roll"
+            title: "Duality Dice Roll",
           });
         });
 
@@ -1277,7 +1629,6 @@ Hooks.on("renderChatLog", (app, html, data) => {
 });
 
 Hooks.on("renderChatMessage", (message, html, data) => {
-
   const flags = message.flags?.daggerheart;
   if (!flags) return;
 
@@ -1287,7 +1638,6 @@ Hooks.on("renderChatMessage", (message, html, data) => {
   const weaponName = flags.weaponName;
 
   if (rollType === "attack") {
-
     const existingButton = html.find(".damage-roll-button").length;
     if (existingButton > 0) return;
 
@@ -1310,13 +1660,26 @@ Hooks.on("renderChatMessage", (message, html, data) => {
 
     if (!weaponData || !weaponData.damage) return;
 
-    const flavor = message.flavor || '';
-    const isCritical = flavor.includes("Critical") && flavor.includes("Success");
+    const flavor = message.flavor || "";
+    const isCritical =
+      flavor.includes("Critical") && flavor.includes("Success");
 
     if (actorType === "character") {
-      _addCharacterDamageButton(html, actor, weaponData, weaponType, isCritical);
+      _addCharacterDamageButton(
+        html,
+        actor,
+        weaponData,
+        weaponType,
+        isCritical
+      );
     } else if (actorType === "npc" || actorType === "companion") {
-      _addAdversaryDamageButton(html, actor, weaponData, weaponType, isCritical);
+      _addAdversaryDamageButton(
+        html,
+        actor,
+        weaponData,
+        weaponType,
+        isCritical
+      );
     }
   }
 
@@ -1328,29 +1691,47 @@ Hooks.on("renderChatMessage", (message, html, data) => {
     _addHealingApplicationButtons(message, html, flags);
   }
 
-  if (flags.messageType === "damageApplied" || flags.messageType === "healingApplied" || flags.messageType === "directDamageApplied") {
+  if (
+    flags.messageType === "damageApplied" ||
+    flags.messageType === "healingApplied" ||
+    flags.messageType === "directDamageApplied"
+  ) {
     _addUndoButtonHandlers(html, flags);
   }
 });
 
-function _addCharacterDamageButton(html, actor, weaponData, weaponType, isCritical) {
+function _addCharacterDamageButton(
+  html,
+  actor,
+  weaponData,
+  weaponType,
+  isCritical
+) {
   const buttonText = isCritical ? "Critical Damage" : "Damage";
 
   let damageDataJson;
-  if (typeof weaponData.damage === 'object' && weaponData.damage !== null && 'baseValue' in weaponData.damage) {
-
+  if (
+    typeof weaponData.damage === "object" &&
+    weaponData.damage !== null &&
+    "baseValue" in weaponData.damage
+  ) {
     damageDataJson = JSON.stringify(weaponData.damage);
   } else {
-
-    const simpleFormula = weaponData.damage || '1d8';
+    const simpleFormula = weaponData.damage || "1d8";
     damageDataJson = JSON.stringify({
       baseValue: simpleFormula,
       modifiers: [],
-      value: simpleFormula
+      value: simpleFormula,
     });
   }
 
-  const damageButton = `<button class="damage-roll-button character ${isCritical ? 'critical' : ''}" data-actor-id="${actor.id}" data-weapon-type="${weaponType}" data-weapon-name="${weaponData.name}" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
+  const damageButton = `<button class="damage-roll-button character ${
+    isCritical ? "critical" : ""
+  }" data-actor-id="${
+    actor.id
+  }" data-weapon-type="${weaponType}" data-weapon-name="${
+    weaponData.name
+  }" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
     <i class="fas fa-dice-d20"></i> ${buttonText}
   </button>`;
 
@@ -1362,24 +1743,38 @@ function _addCharacterDamageButton(html, actor, weaponData, weaponType, isCritic
   });
 }
 
-function _addAdversaryDamageButton(html, actor, weaponData, weaponType, isCritical) {
+function _addAdversaryDamageButton(
+  html,
+  actor,
+  weaponData,
+  weaponType,
+  isCritical
+) {
   const buttonText = isCritical ? "Critical Damage" : "Damage";
 
   let damageDataJson;
-  if (typeof weaponData.damage === 'object' && weaponData.damage !== null && 'baseValue' in weaponData.damage) {
-
+  if (
+    typeof weaponData.damage === "object" &&
+    weaponData.damage !== null &&
+    "baseValue" in weaponData.damage
+  ) {
     damageDataJson = JSON.stringify(weaponData.damage);
   } else {
-
-    const simpleFormula = weaponData.damage || '1d8';
+    const simpleFormula = weaponData.damage || "1d8";
     damageDataJson = JSON.stringify({
       baseValue: simpleFormula,
       modifiers: [],
-      value: simpleFormula
+      value: simpleFormula,
     });
   }
 
-  const damageButton = `<button class="damage-roll-button adversary ${isCritical ? 'critical' : ''}" data-actor-id="${actor.id}" data-weapon-type="${weaponType}" data-weapon-name="${weaponData.name}" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
+  const damageButton = `<button class="damage-roll-button adversary ${
+    isCritical ? "critical" : ""
+  }" data-actor-id="${
+    actor.id
+  }" data-weapon-type="${weaponType}" data-weapon-name="${
+    weaponData.name
+  }" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
     <i class="fas fa-dice-d20"></i> ${buttonText}
   </button>`;
 
@@ -1409,8 +1804,8 @@ function _handleCharacterDamageButton(message, html, actor, flavor) {
   const existingButton = html.find(".damage-roll-button").length;
 
   if (weaponData && weaponData.damage && !existingButton) {
-
-    const isDamageRoll = flavor.includes("Damage") ||
+    const isDamageRoll =
+      flavor.includes("Damage") ||
       flavor.includes("damage") ||
       flavor.toLowerCase().includes("- damage") ||
       flavor.includes("Critical Damage") ||
@@ -1419,25 +1814,33 @@ function _handleCharacterDamageButton(message, html, actor, flavor) {
     const hasHopeFear = flavor.includes("Hope") || flavor.includes("Fear");
 
     if (hasHopeFear && !isDamageRoll) {
-
-      const isCritical = flavor.includes("Critical") && flavor.includes("Success");
+      const isCritical =
+        flavor.includes("Critical") && flavor.includes("Success");
 
       let damageDataJson;
-      if (typeof weaponData.damage === 'object' && weaponData.damage !== null && 'baseValue' in weaponData.damage) {
-
+      if (
+        typeof weaponData.damage === "object" &&
+        weaponData.damage !== null &&
+        "baseValue" in weaponData.damage
+      ) {
         damageDataJson = JSON.stringify(weaponData.damage);
       } else {
-
-        const simpleFormula = weaponData.damage || '1d8';
+        const simpleFormula = weaponData.damage || "1d8";
         damageDataJson = JSON.stringify({
           baseValue: simpleFormula,
           modifiers: [],
-          value: simpleFormula
+          value: simpleFormula,
         });
       }
 
       const buttonText = isCritical ? "Critical Damage" : "Damage";
-      const damageButton = `<button class="damage-roll-button character ${isCritical ? 'critical' : ''}" data-actor-id="${actor.id}" data-weapon-type="${weaponType}" data-weapon-name="${weaponData.name}" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
+      const damageButton = `<button class="damage-roll-button character ${
+        isCritical ? "critical" : ""
+      }" data-actor-id="${
+        actor.id
+      }" data-weapon-type="${weaponType}" data-weapon-name="${
+        weaponData.name
+      }" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
         <i class="fas fa-dice-d20"></i> ${buttonText}
       </button>`;
 
@@ -1470,8 +1873,8 @@ function _handleAdversaryDamageButton(message, html, actor, flavor) {
   const existingButton = html.find(".damage-roll-button").length;
 
   if (weaponData && weaponData.damage && !existingButton) {
-
-    const isDamageRoll = flavor.includes("Damage") ||
+    const isDamageRoll =
+      flavor.includes("Damage") ||
       flavor.includes("damage") ||
       flavor.toLowerCase().includes("- damage") ||
       flavor.includes("Critical Damage") ||
@@ -1480,25 +1883,32 @@ function _handleAdversaryDamageButton(message, html, actor, flavor) {
     const isAttackRoll = flavor.includes(weaponData.name) && !isDamageRoll;
 
     if (isAttackRoll) {
-
       const isCritical = flavor.includes("Critical Success");
 
       let damageDataJson;
-      if (typeof weaponData.damage === 'object' && weaponData.damage !== null && 'baseValue' in weaponData.damage) {
-
+      if (
+        typeof weaponData.damage === "object" &&
+        weaponData.damage !== null &&
+        "baseValue" in weaponData.damage
+      ) {
         damageDataJson = JSON.stringify(weaponData.damage);
       } else {
-
-        const simpleFormula = weaponData.damage || '1d8';
+        const simpleFormula = weaponData.damage || "1d8";
         damageDataJson = JSON.stringify({
           baseValue: simpleFormula,
           modifiers: [],
-          value: simpleFormula
+          value: simpleFormula,
         });
       }
 
       const buttonText = isCritical ? "Critical Damage" : "Damage";
-      const damageButton = `<button class="damage-roll-button adversary ${isCritical ? 'critical' : ''}" data-actor-id="${actor.id}" data-weapon-type="${weaponType}" data-weapon-name="${weaponData.name}" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
+      const damageButton = `<button class="damage-roll-button adversary ${
+        isCritical ? "critical" : ""
+      }" data-actor-id="${
+        actor.id
+      }" data-weapon-type="${weaponType}" data-weapon-name="${
+        weaponData.name
+      }" data-weapon-damage-structure="${damageDataJson}" data-is-critical="${isCritical}" style="margin-top: 0.5em; width: 100%;">
         <i class="fas fa-dice-d20"></i> ${buttonText}
       </button>`;
 
@@ -1531,60 +1941,65 @@ async function _rollConsolidatedDamage(event) {
   try {
     damageData = JSON.parse(damageStructureJson);
   } catch (error) {
-    console.warn("Daggerheart | Invalid damage structure in button, fetching from actor");
+    console.warn(
+      "Daggerheart | Invalid damage structure in button, fetching from actor"
+    );
 
     const weaponField = weaponType === "primary" ? "weapon-main" : "weapon-off";
     const weaponData = actor.system[weaponField];
 
     if (weaponData && weaponData.damage) {
-      if (typeof weaponData.damage === 'object' && weaponData.damage !== null && 'baseValue' in weaponData.damage) {
+      if (
+        typeof weaponData.damage === "object" &&
+        weaponData.damage !== null &&
+        "baseValue" in weaponData.damage
+      ) {
         damageData = weaponData.damage;
       } else {
-
         damageData = {
-          baseValue: weaponData.damage || '1d8',
+          baseValue: weaponData.damage || "1d8",
           modifiers: [],
-          value: weaponData.damage || '1d8'
+          value: weaponData.damage || "1d8",
         };
       }
     } else {
-
       damageData = {
-        baseValue: '1d8',
+        baseValue: "1d8",
         modifiers: [],
-        value: '1d8'
+        value: "1d8",
       };
     }
   }
 
-  const proficiency = actor.type === "character" ?
-    Math.max(1, parseInt(actor.system.proficiency?.value) || 1) : null;
+  const proficiency =
+    actor.type === "character"
+      ? Math.max(1, parseInt(actor.system.proficiency?.value) || 1)
+      : null;
 
-  const flavorText = isCritical ? `${weaponName} - Critical Damage!` : `${weaponName} - Damage`;
+  const flavorText = isCritical
+    ? `${weaponName} - Critical Damage!`
+    : `${weaponName} - Damage`;
 
   try {
-    await game.daggerheart.damageApplication.rollDamage(
-      null,
-      {
-        sourceActor: actor,
+    await game.daggerheart.damageApplication.rollDamage(null, {
+      sourceActor: actor,
+      weaponName: weaponName,
+      weaponType: weaponType,
+      isCritical: isCritical,
+      damageData: damageData,
+      proficiency: proficiency,
+      source: "chat-card",
+      flavor: flavorText,
+      chatFlags: {
+        rollType: "damage",
+        actorId: actor.id,
+        actorType: actor.type,
         weaponName: weaponName,
         weaponType: weaponType,
         isCritical: isCritical,
-        damageData: damageData,
-        proficiency: proficiency,
-        source: "chat-card",
-        flavor: flavorText,
-        chatFlags: {
-          rollType: "damage",
-          actorId: actor.id,
-          actorType: actor.type,
-          weaponName: weaponName,
-          weaponType: weaponType,
-          isCritical: isCritical,
-          isManualRoll: true
-        }
-      }
-    );
+        isManualRoll: true,
+      },
+    });
   } catch (error) {
     console.error("Error creating consolidated damage roll:", error);
     ui.notifications.warn("Damage roll failed. Check console for details.");
@@ -1604,7 +2019,11 @@ function _updateArmorSlotsValue(html, delta) {
   const currentElement = html.find(".armor-slots-current");
   const maxElement = html.find(".armor-slots-max");
 
-  if (!armorSlotsContainer.length || !currentElement.length || !maxElement.length) {
+  if (
+    !armorSlotsContainer.length ||
+    !currentElement.length ||
+    !maxElement.length
+  ) {
     console.warn("Armor slots elements not found");
     return;
   }
@@ -1615,7 +2034,6 @@ function _updateArmorSlotsValue(html, delta) {
   const newValue = Math.max(0, Math.min(max, current + delta));
 
   if (newValue !== current) {
-
     currentElement.text(newValue);
 
     armorSlotsContainer.data("current", newValue);
@@ -1651,9 +2069,10 @@ function _getArmorSlotsUI(currentSlots = 0, maxSlots = 3, showUI = true) {
 function _getTargetArmorInfo() {
   const targets = Array.from(game.user.targets);
   if (targets.length === 0) return { showUI: false, maxSlots: 0 };
-  const characterTarget = targets.find(t => t.actor?.type === "character");
+  const characterTarget = targets.find((t) => t.actor?.type === "character");
   if (!characterTarget) return { showUI: false, maxSlots: 0 };
-  const maxSlots = parseInt(characterTarget.actor.system.defenses?.["armor-slots"]?.max) || 3;
+  const maxSlots =
+    parseInt(characterTarget.actor.system.defenses?.["armor-slots"]?.max) || 3;
   return { showUI: true, maxSlots };
 }
 
@@ -1676,8 +2095,9 @@ function _initializeArmorSlotsHandlers(html, initialValue = 0, maxValue = 3) {
 }
 
 function _addDamageApplicationButtons(message, html, flags) {
-
-  const existingButtons = html.find(".apply-damage-button, .apply-healing-button").length;
+  const existingButtons = html.find(
+    ".apply-damage-button, .apply-healing-button"
+  ).length;
   if (existingButtons > 0) return;
 
   const damageAmount = flags.damageAmount || extractRollTotal(message);
@@ -1688,10 +2108,14 @@ function _addDamageApplicationButtons(message, html, flags) {
   const armorSlotsUI = _getMultiTargetArmorSlotsUI();
 
   const buttonContainer = `${armorSlotsUI}<div class="damage-application-buttons" style="margin-top: 0.5em; display: flex; gap: 0.25em;">
-    <button class="apply-damage-button" data-damage="${damageAmount}" data-source-actor-id="${flags.actorId || ''}" style="flex: 1;">
+    <button class="apply-damage-button" data-damage="${damageAmount}" data-source-actor-id="${
+    flags.actorId || ""
+  }" style="flex: 1;">
       <i class="fas fa-sword"></i> Damage (${damageAmount})
     </button>
-    <button class="apply-healing-button" data-healing="${damageAmount}" data-source-actor-id="${flags.actorId || ''}" style="flex: 1;">
+    <button class="apply-healing-button" data-healing="${damageAmount}" data-source-actor-id="${
+    flags.actorId || ""
+  }" style="flex: 1;">
       <i class="fas fa-heart"></i> Heal (${damageAmount})
     </button>
   </div>`;
@@ -1714,8 +2138,9 @@ function _addDamageApplicationButtons(message, html, flags) {
 }
 
 function _addHealingApplicationButtons(message, html, flags) {
-
-  const existingButtons = html.find(".apply-damage-button, .apply-healing-button").length;
+  const existingButtons = html.find(
+    ".apply-damage-button, .apply-healing-button"
+  ).length;
   if (existingButtons > 0) return;
 
   const healingAmount = flags.healingAmount || extractRollTotal(message);
@@ -1726,10 +2151,14 @@ function _addHealingApplicationButtons(message, html, flags) {
   const armorSlotsUI = _getMultiTargetArmorSlotsUI();
 
   const buttonContainer = `${armorSlotsUI}<div class="damage-application-buttons" style="margin-top: 0.5em; display: flex; gap: 0.25em;">
-    <button class="apply-healing-button" data-healing="${healingAmount}" data-source-actor-id="${flags.actorId || ''}" style="flex: 1;">
+    <button class="apply-healing-button" data-healing="${healingAmount}" data-source-actor-id="${
+    flags.actorId || ""
+  }" style="flex: 1;">
       <i class="fas fa-heart"></i> Heal (${healingAmount})
     </button>
-    <button class="apply-damage-button" data-damage="${healingAmount}" data-source-actor-id="${flags.actorId || ''}" style="flex: 1;">
+    <button class="apply-damage-button" data-damage="${healingAmount}" data-source-actor-id="${
+    flags.actorId || ""
+  }" style="flex: 1;">
       <i class="fas fa-sword"></i> Damage (${healingAmount})
     </button>
   </div>`;
@@ -1770,13 +2199,17 @@ async function _handleDamageApplicationButton(event, type) {
 
     if (Object.keys(armorSlotsData).length > 0) {
       armorSlotsUsed = armorSlotsData;
-      console.log(`Daggerheart | Using per-target armor slots:`, armorSlotsData);
+      console.log(
+        `Daggerheart | Using per-target armor slots:`,
+        armorSlotsData
+      );
     } else {
-
       const armorSlotsContainer = messageElement.find(".armor-slots-ui");
       if (armorSlotsContainer.length) {
         armorSlotsUsed = parseInt(armorSlotsContainer.data("current")) || 0;
-        console.log(`Daggerheart | Using single armor slots value: ${armorSlotsUsed} for all targets`);
+        console.log(
+          `Daggerheart | Using single armor slots value: ${armorSlotsUsed} for all targets`
+        );
       }
     }
   }
@@ -1784,7 +2217,13 @@ async function _handleDamageApplicationButton(event, type) {
   try {
     let result = { success: false, undoId: null };
     if (type === "damage") {
-      result = await applyDamage(null, amount, sourceActor, true, armorSlotsUsed);
+      result = await applyDamage(
+        null,
+        amount,
+        sourceActor,
+        true,
+        armorSlotsUsed
+      );
     } else if (type === "healing") {
       result = await applyHealing(null, amount, sourceActor);
     }
@@ -1794,83 +2233,84 @@ async function _handleDamageApplicationButton(event, type) {
     }
   } catch (error) {
     console.error(`Error applying ${type}:`, error);
-    ui.notifications.error(`Error applying ${type}. Check console for details.`);
+    ui.notifications.error(
+      `Error applying ${type}. Check console for details.`
+    );
   }
 }
 
-Hooks.on("preCreateChatMessage", (message, data, options, userId) => {
-
-});
+Hooks.on("preCreateChatMessage", (message, data, options, userId) => {});
 
 Hooks.on("getActorDirectoryEntryContext", (html, options) => {
-
   options.push({
     name: game.i18n.localize("SIMPLE.DefineTemplate"),
     icon: '<i class="fas fa-stamp"></i>',
-    condition: li => {
+    condition: (li) => {
       const actor = game.actors.get(li.data("documentId"));
       return !actor.isTemplate;
     },
-    callback: li => {
+    callback: (li) => {
       const actor = game.actors.get(li.data("documentId"));
       actor.setFlag("daggerheart", "isTemplate", true);
-    }
+    },
   });
 
   options.push({
     name: game.i18n.localize("SIMPLE.UnsetTemplate"),
     icon: '<i class="fas fa-times"></i>',
-    condition: li => {
+    condition: (li) => {
       const actor = game.actors.get(li.data("documentId"));
       return actor.isTemplate;
     },
-    callback: li => {
+    callback: (li) => {
       const actor = game.actors.get(li.data("documentId"));
       actor.setFlag("daggerheart", "isTemplate", false);
-    }
+    },
   });
 });
 
 Hooks.on("getItemDirectoryEntryContext", (html, options) => {
-
   options.push({
     name: game.i18n.localize("SIMPLE.DefineTemplate"),
     icon: '<i class="fas fa-stamp"></i>',
-    condition: li => {
+    condition: (li) => {
       const item = game.items.get(li.data("documentId"));
       return !item.isTemplate;
     },
-    callback: li => {
+    callback: (li) => {
       const item = game.items.get(li.data("documentId"));
       item.setFlag("daggerheart", "isTemplate", true);
-    }
+    },
   });
 
   options.push({
     name: game.i18n.localize("SIMPLE.UnsetTemplate"),
     icon: '<i class="fas fa-times"></i>',
-    condition: li => {
+    condition: (li) => {
       const item = game.items.get(li.data("documentId"));
       return item.isTemplate;
     },
-    callback: li => {
+    callback: (li) => {
       const item = game.items.get(li.data("documentId"));
       item.setFlag("daggerheart", "isTemplate", false);
-    }
+    },
   });
 });
 
-Hooks.on('getItemContextOptions', (application, buttons) => {
-  const CompatibleTypes = ['Item'];
+Hooks.on("getItemContextOptions", (application, buttons) => {
+  const CompatibleTypes = ["Item"];
   const documentName = application.documentName;
   if (!CompatibleTypes.includes(documentName)) return;
 
   buttons.push({
     name: "To Chat",
     icon: '<i class="fa-solid fa-comment-alt"></i>',
-    callback: async li => {
-      const entryId = li.dataset['entryId'];
-      const entryPack = application.collection?.applicationClass?.name === 'Compendium' ? application.collection : undefined;
+    callback: async (li) => {
+      const entryId = li.dataset["entryId"];
+      const entryPack =
+        application.collection?.applicationClass?.name === "Compendium"
+          ? application.collection
+          : undefined;
 
       if (entryPack) {
         const item = await entryPack.getDocument(entryId);
@@ -1882,10 +2322,10 @@ Hooks.on('getItemContextOptions', (application, buttons) => {
 
       return false;
     },
-  })
+  });
 });
 
-Hooks.on('getItemSheetHeaderButtons', (sheet, buttons) => {
+Hooks.on("getItemSheetHeaderButtons", (sheet, buttons) => {
   buttons.unshift({
     label: "To Chat",
     class: "to-chat",
@@ -1899,8 +2339,10 @@ Hooks.on('getItemSheetHeaderButtons', (sheet, buttons) => {
 });
 
 async function _sendItemToChat(item) {
-  const actor = canvas.tokens.controlled[0]?.actor ??
-    game.user?.character ?? new Actor({
+  const actor =
+    canvas.tokens.controlled[0]?.actor ??
+    game.user?.character ??
+    new Actor({
       name: game.user.name,
       type: "character",
     });
@@ -1910,64 +2352,65 @@ async function _sendItemToChat(item) {
     actorId: actor.id,
     image: item.img,
     name: item.name,
-    category: item.system.category || '',
-    rarity: item.system.rarity || '',
-    description: item.system.description || ''
+    category: item.system.category || "",
+    rarity: item.system.rarity || "",
+    description: item.system.description || "",
   });
 
   ChatMessage.create({
     user: game.user.id,
     speaker: ChatMessage.getSpeaker({ actor }),
-    content: chatCard
+    content: chatCard,
   });
 }
 
 function _addUndoButtonHandlers(html, flags) {
-  html.find(".undo-damage-button, .undo-healing-button").click(async (event) => {
-    event.preventDefault();
-    const button = event.currentTarget;
-    const undoId = button.dataset.undoId;
+  html
+    .find(".undo-damage-button, .undo-healing-button")
+    .click(async (event) => {
+      event.preventDefault();
+      const button = event.currentTarget;
+      const undoId = button.dataset.undoId;
 
-    if (!undoId) {
-      ui.notifications.error("Undo ID not found.");
-      return;
-    }
+      if (!undoId) {
+        ui.notifications.error("Undo ID not found.");
+        return;
+      }
 
-    try {
+      try {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...';
 
-      button.disabled = true;
-      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Undoing...';
+        const success = await undoDamageHealing(undoId);
 
-      const success = await undoDamageHealing(undoId);
-
-      if (success) {
-
-        button.innerHTML = '<i class="fas fa-check"></i> Undone';
-        button.style.opacity = "0.6";
-      } else {
+        if (success) {
+          button.innerHTML = '<i class="fas fa-check"></i> Undone';
+          button.style.opacity = "0.6";
+        } else {
+          button.disabled = false;
+          button.innerHTML = '<i class="fas fa-undo"></i> Undo';
+        }
+      } catch (error) {
+        console.error("Error during undo:", error);
+        ui.notifications.error("Error during undo. Check console for details.");
 
         button.disabled = false;
         button.innerHTML = '<i class="fas fa-undo"></i> Undo';
       }
-    } catch (error) {
-      console.error("Error during undo:", error);
-      ui.notifications.error("Error during undo. Check console for details.");
-
-      button.disabled = false;
-      button.innerHTML = '<i class="fas fa-undo"></i> Undo';
-    }
-  });
+    });
 }
 
 function _getMultiTargetArmorInfo() {
   const characterTargets = [];
   const targets = Array.from(game.user.targets);
-  targets.forEach(token => {
+  targets.forEach((token) => {
     if (token.actor?.type === "character") {
       // Only include if user is GM or owner
       if (game.user.isGM || token.actor.isOwner) {
-        const maxSlots = parseInt(token.actor.system.defenses?.armor?.value) || 3;
-        const currentSlots = parseInt(token.actor.system.defenses?.["armor-slots"]?.value) || 0;
+        const maxSlots =
+          parseInt(token.actor.system.defenses?.armor?.value) || 3;
+        const currentSlots =
+          parseInt(token.actor.system.defenses?.["armor-slots"]?.value) || 0;
         const availableSlots = maxSlots - currentSlots;
         const usableSlots = Math.min(availableSlots, 3);
         characterTargets.push({
@@ -1977,7 +2420,7 @@ function _getMultiTargetArmorInfo() {
           maxSlots,
           currentSlots,
           availableSlots,
-          usableSlots
+          usableSlots,
         });
       }
     }
@@ -1992,10 +2435,10 @@ function _getMultiTargetArmorSlotsUI() {
     return "";
   }
 
-  let armorUIHtml = '<div class="multi-target-armor-container" style="margin: 0.75em 0 0.5em 0;">';
+  let armorUIHtml =
+    '<div class="multi-target-armor-container" style="margin: 0.75em 0 0.5em 0;">';
 
   if (characterTargets.length === 1) {
-
     const target = characterTargets[0];
     armorUIHtml += `
       <div class="armor-slots-ui resource armor-slots" data-actor-id="${target.id}">
@@ -2020,10 +2463,10 @@ function _getMultiTargetArmorSlotsUI() {
         </div>
       </div>`;
   } else {
+    armorUIHtml +=
+      '<div class="multi-target-armor-header"><label>Armor Slots Per Character:</label></div>';
 
-    armorUIHtml += '<div class="multi-target-armor-header"><label>Armor Slots Per Character:</label></div>';
-
-    characterTargets.forEach(target => {
+    characterTargets.forEach((target) => {
       armorUIHtml += `
         <div class="armor-slots-ui resource armor-slots" data-actor-id="${target.id}" style="margin: 0.25em 0;">
           <div class="resource-content">
@@ -2049,7 +2492,7 @@ function _getMultiTargetArmorSlotsUI() {
     });
   }
 
-  armorUIHtml += '</div>';
+  armorUIHtml += "</div>";
   return armorUIHtml;
 }
 
@@ -2096,7 +2539,6 @@ function _updateMultiTargetArmorSlotsValue(container, delta) {
   const newValue = Math.max(0, Math.min(max, current + delta));
 
   if (newValue !== current) {
-
     currentElement.text(newValue);
 
     container.data("current", newValue);
