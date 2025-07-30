@@ -5,12 +5,6 @@
   "url": "",
   "description": "Unofficial Daggerheart Game System for 7th Sea",
   "license": "LICENSE.txt",
-  "authors": [
-    {
-      "name": "featureJosh",
-      "url": "https://github.com/featureJosh"
-    }
-  ],
   "esmodules": ["module/simple.js"],
   "styles": ["styles/simple.css"],
   "packs": [
@@ -40,5 +34,5 @@
   "primaryTokenAttribute": "barHealth",
   "secondaryTokenAttribute": "barStress",
   "manifest": "https://raw.githubusercontent.com/MihaiSereanu/daggerheart-7th-sea/refs/heads/master/system.json",
-  "download": "https://github.com/unofficial-daggerheart/daggerheart/archive/refs/tags/v2.11.1.zip"
+  "download": "https://github.com/MihaiSereanu/daggerheart-7th-sea/releases/tag/v2.11.2.zip"
 }
